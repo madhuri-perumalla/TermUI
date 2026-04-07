@@ -89,6 +89,11 @@ const t = render(
 expect(t.lastFrame()).toMatchSnapshot()
 ```
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/testing/overview](https://www.termui.io/docs/testing/overview).
+
 ## License
 
 MIT

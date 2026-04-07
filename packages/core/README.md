@@ -65,7 +65,7 @@ State changes are batched via `queueMicrotask`. Multiple `setState` calls in the
 
 ## API reference
 
-Full docs at [termuijs.dev/docs/core/overview](https://termuijs.dev/docs/core/overview).
+Full docs at [www.termui.io/docs/core/overview](https://www.termui.io/docs/core/overview).
 
 ## License
 

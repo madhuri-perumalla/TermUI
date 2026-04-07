@@ -61,6 +61,11 @@ app('Monitor')
     .run()
 ```
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/guides/quick](https://www.termui.io/docs/guides/quick).
+
 ## License
 
 MIT

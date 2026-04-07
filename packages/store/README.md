@@ -93,6 +93,11 @@ const useDataStore = createStore((set) => ({
 | `useStore.subscribe(listener)` | Listen to changes, returns unsubscribe |
 | `useStore.destroy()` | Remove all subscribers (useful in tests) |
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/store/overview](https://www.termui.io/docs/store/overview).
+
 ## License
 
 MIT

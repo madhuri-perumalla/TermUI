@@ -64,6 +64,11 @@ if (process.env.TERMUI_DEV === '1') {
 
 Ctrl+C sends SIGTERM to the dev server, which forwards it to the child process and waits for it to exit cleanly before shutting down itself.
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/guides/dev-server](https://www.termui.io/docs/guides/dev-server).
+
 ## License
 
 MIT

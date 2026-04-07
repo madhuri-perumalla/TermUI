@@ -76,6 +76,11 @@ router.guard('/settings', () => {
 })
 ```
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/router/overview](https://www.termui.io/docs/router/overview).
+
 ## License
 
 MIT

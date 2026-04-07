@@ -4,6 +4,7 @@
 </p>
 
 <p align="center">
+  <a href="https://www.termui.io/docs/getting-started/installation"><img src="https://img.shields.io/badge/docs-termui.io-00ff88?style=flat" alt="Documentation"></a>
   <a href="https://www.npmjs.com/package/@termuijs/core"><img src="https://img.shields.io/npm/v/@termuijs/core.svg" alt="npm version"></a>
   <a href="https://github.com/Karanjot786/TermUI/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/tests-356%20passing-brightgreen" alt="356 tests passing">
@@ -52,7 +53,7 @@ const app = new App(rootWidget)
 await app.mount()
 ```
 
-> **Note:** The JSX-based API above shows the component-based approach with `@termuijs/jsx`. See the [Quick Start](/docs/getting-started/quick-start) for the widget-tree approach.
+> **Note:** The JSX-based API above shows the component-based approach with `@termuijs/jsx`. See the [Quick Start](https://www.termui.io/docs/getting-started/quick-start) for the widget-tree approach.
 
 ## Packages
 

@@ -50,6 +50,11 @@ my-app/
 
 Everything is TypeScript, and the dev server is preconfigured in the `dev` script.
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/getting-started/installation](https://www.termui.io/docs/getting-started/installation).
+
 ## License
 
 MIT

@@ -72,6 +72,11 @@ Three stages:
 
 The engine caches resolved styles, so repeated lookups for the same selector are fast.
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/tss/overview](https://www.termui.io/docs/tss/overview).
+
 ## License
 
 MIT

@@ -87,6 +87,11 @@ list.setRenderItem((i) => newData[i].label)
 - `markDirty()` — flags the widget for re-render on the next frame
 - Focus ring rendering when focused
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/widgets/overview](https://www.termui.io/docs/widgets/overview).
+
 ## License
 
 MIT

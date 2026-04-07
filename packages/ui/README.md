@@ -56,6 +56,11 @@ const palette = new CommandPalette({
 })
 ```
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/ui/overview](https://www.termui.io/docs/ui/overview).
+
 ## License
 
 MIT

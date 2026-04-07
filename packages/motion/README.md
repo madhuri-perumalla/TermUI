@@ -58,6 +58,11 @@ transition(widget, {
 
 The spring simulation runs per-frame. Each tick updates position and velocity using the spring equation. Once velocity drops below a threshold and position is close enough to the target, the spring settles and stops ticking. No wasted CPU on finished animations.
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/motion/springs](https://www.termui.io/docs/motion/springs).
+
 ## License
 
 MIT

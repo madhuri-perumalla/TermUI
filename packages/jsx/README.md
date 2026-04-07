@@ -126,6 +126,11 @@ Multiple `setState` calls in the same tick get batched into one render. This hap
 
 The JSX runtime converts TSX elements into TermUI widget trees. Each functional component gets a Fiber that tracks its hook state. When state changes, the reconciler diffs the old and new trees and applies the minimum set of updates to the screen. Context values propagate by walking up the Fiber parent chain.
 
+
+## Documentation
+
+Full docs at [www.termui.io/docs/jsx/context](https://www.termui.io/docs/jsx/context).
+
 ## License
 
 MIT

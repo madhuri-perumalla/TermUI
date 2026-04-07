@@ -4,7 +4,27 @@ All notable changes to TermUI are documented here. The format is based on [Keep 
 
 ---
 
-## [0.1.2] — Unreleased
+## [0.1.3] — 2026-04-07
+
+### Added
+
+- **`homepage` field** added to all 13 package `package.json` files, pointing to the relevant docs page on `termui.io`.
+- **`repository` field** added to all 13 package `package.json` files, linking to the GitHub monorepo.
+- **Root `package.json`** — added `homepage` (`https://www.termui.io`) and `repository` fields.
+
+### Changed
+
+- **`@termuijs/store` and `@termuijs/testing`** version aligned with the rest of the monorepo (`0.1.0` → `0.1.3`).
+
+### Documentation
+
+- **All package READMEs** — added `## Documentation` section before `## License` with a direct link to the relevant docs page on `termui.io`.
+- **Root README** — added docs badge to the header; fixed relative Quick Start link to absolute `https://www.termui.io/docs/getting-started/quick-start`.
+- **`packages/core` README** — fixed wrong docs domain (`termuijs.dev` → `termui.io`).
+
+---
+
+## [0.1.2] — 2026-04-02
 
 ### Fixed
 
