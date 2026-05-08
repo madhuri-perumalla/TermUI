@@ -53,3 +53,6 @@ export type { FormField, FormOptions } from './Form.js';
 
 export { CommandPalette } from './CommandPalette.js';
 export type { Command, CommandPaletteOptions } from './CommandPalette.js';
+
+export { prompt, NonInteractiveError } from './prompts.js';
+export type { TextPromptOptions, ConfirmPromptOptions, SelectPromptOptions } from './prompts.js';
