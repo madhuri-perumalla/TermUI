@@ -43,6 +43,8 @@ export type { Bar, BarGroup, BarChartDirection, BarChartOptions } from './data/B
 // ── Feedback Widgets ──────────────────────────────────
 export { ProgressBar } from './feedback/ProgressBar.js';
 export type { ProgressBarOptions } from './feedback/ProgressBar.js';
+export { MultiProgress } from './feedback/MultiProgress.js';
+export type { ProgressItem, MultiProgressOptions } from './feedback/MultiProgress.js';
 export { Spinner, SPINNER_FRAMES } from './feedback/Spinner.js';
 export type { SpinnerOptions } from './feedback/Spinner.js';
 export { Scrollbar } from './feedback/Scrollbar.js';
