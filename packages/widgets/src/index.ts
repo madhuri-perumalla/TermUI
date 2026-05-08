@@ -16,6 +16,8 @@ export { Tree } from './display/Tree.js';
 export type { TreeNode, TreeOptions } from './display/Tree.js';
 export { JSONView, jsonToTree } from './display/JSONView.js';
 export type { JSONViewOptions, JSONNodeData, JSONNodeType } from './display/JSONView.js';
+export { DiffView } from './display/DiffView.js';
+export type { DiffLine, DiffViewOptions } from './display/DiffView.js';
 
 // ── Input Widgets ─────────────────────────────────────
 export { List } from './input/List.js';
