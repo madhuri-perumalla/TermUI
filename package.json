@@ -13,7 +13,9 @@
     "test:watch": "bun vitest",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "bench": "bun packages/core/src/benchmark/render-loop.ts",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \".\""
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -33,5 +35,9 @@
     "type": "git",
     "url": "https://github.com/Karanjot786/TermUI"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^15.0.0",
+    "dotenv": "^16.0.0"
+  }
 }

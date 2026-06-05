@@ -2,8 +2,10 @@
 // @termuijs/core — Tests for Screen buffer
 // ─────────────────────────────────────────────────────
 
-import { describe, it, expect } from 'vitest';
-import { Screen, emptyCell, cellsEqual } from '../terminal/Screen.js';
+import { describe, it, expect, vi } from 'vitest';
+import { Screen, emptyCell, resetCell, cellsEqual } from './Screen.js';
+import { caps } from './env-caps.js';
+import { hyperlinkOpen, hyperlinkClose } from '../utils/ansi.js';
 
 describe('Screen', () => {
     it('initializes with correct dimensions', () => {
@@ -88,13 +90,28 @@ describe('Screen', () => {
         expect(screen.back[0][0].char).toBe(' ');
     });
 
-    it('writeString handles wide CJK characters', () => {
+    it('writeString handles wide CJK characters with unicode support enabled', () => {
         const screen = new Screen(10, 3);
         screen.writeString(0, 0, '你好');
         expect(screen.back[0][0].char).toBe('你');
         expect(screen.back[0][0].width).toBe(2);
         expect(screen.back[0][1].width).toBe(0); // continuation cell
         expect(screen.back[0][2].char).toBe('好');
+    });
+
+    it('writeString degrades wide characters to * when unicode support is missing', () => {
+        const spy = vi.spyOn(caps, 'unicode', 'get').mockReturnValue(false);
+        
+        const screen = new Screen(10, 3);
+        screen.writeString(0, 0, '你好'); // 2 wide characters
+        
+        // They should degrade into 2 individual * characters taking up only 1 space each
+        expect(screen.back[0][0].char).toBe('*');
+        expect(screen.back[0][0].width).toBe(1);
+        expect(screen.back[0][1].char).toBe('*');
+        expect(screen.back[0][1].width).toBe(1);
+
+        spy.mockRestore();
     });
 
     it('setCell floors fractional coordinates', () => {
@@ -131,5 +148,46 @@ describe('cellsEqual', () => {
         const a = emptyCell();
         const b = { ...emptyCell(), fg: { type: 'named' as const, name: 'red' as const } };
         expect(cellsEqual(a, b)).toBe(false);
+    });
+});
+
+describe('Screen and Cell Hyperlink Support', () => {
+    it('a cell written with link retains it', () => {
+        const s = new Screen(20, 1);
+        s.setCell(0, 0, { char: 'x', link: 'https://termui.dev' });
+        expect(s.back[0][0].link).toBe('https://termui.dev');
+    });
+
+    it('emptyCell().link is undefined', () => {
+        expect(emptyCell().link).toBeUndefined();
+    });
+
+    it('resetCell clears a previously set link', () => {
+        const cell = emptyCell();
+        cell.link = 'https://termui.dev';
+        resetCell(cell);
+        expect(cell.link).toBeUndefined();
+    });
+
+    it('cellsEqual distinguishes differing links', () => {
+        const c1 = emptyCell();
+        const c2 = emptyCell();
+        
+        expect(cellsEqual(c1, c2)).toBe(true);
+        
+        c1.link = 'https://termui.dev';
+        expect(cellsEqual(c1, c2)).toBe(false);
+        
+        c2.link = 'https://termui.dev';
+        expect(cellsEqual(c1, c2)).toBe(true);
+    });
+
+    it('hyperlinkOpen produces a valid OSC 8 prefix', () => {
+        const url = 'https://termui.dev';
+        expect(hyperlinkOpen(url)).toBe(`\x1b]8;;${url}\x1b\\`);
+    });
+
+    it('hyperlinkClose produces a valid OSC 8 suffix', () => {
+        expect(hyperlinkClose).toBe(`\x1b]8;;\x1b\\`);
     });
 });
