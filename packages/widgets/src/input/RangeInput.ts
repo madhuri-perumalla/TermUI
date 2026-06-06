@@ -27,6 +27,7 @@ export class RangeInput extends Widget {
     private _color: Color;
     private _showValue: boolean;
     private _activeThumb: 0 | 1 = 0;
+    focusable = true;
 
     constructor(
         label: string,

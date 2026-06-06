@@ -26,22 +26,33 @@ describe("TimePicker", () => {
         expect(row).not.toContain("PM");
     });
 
-    it("handles keyboard events to increment/decrement", () => {
+    it("handles keyboard events to increment hours", () => {
         const d = new Date(2020, 1, 1, 14, 30);
         const picker = new TimePicker({ value: d });
 
         // Active segment is 0 (Hours) by default
         picker.handleKey(createKeyEvent({ key: "up", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
         expect(picker.value.getHours()).toBe(15);
+    });
+
+    it("handles keyboard events to increment minutes", () => {
+        const d = new Date(2020, 1, 1, 14, 30);
+        const picker = new TimePicker({ value: d });
 
         // Move to minutes
         picker.handleKey(createKeyEvent({ key: "right", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
         picker.handleKey(createKeyEvent({ key: "up", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
         expect(picker.value.getMinutes()).toBe(31);
+    });
+
+    it("handles keyboard events to toggle AM/PM", () => {
+        const d = new Date(2020, 1, 1, 14, 30); // 2:30 PM
+        const picker = new TimePicker({ value: d });
 
         // Move to AM/PM
         picker.handleKey(createKeyEvent({ key: "right", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
+        picker.handleKey(createKeyEvent({ key: "right", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
         picker.handleKey(createKeyEvent({ key: "up", raw: Buffer.from(""), ctrl: false, alt: false, shift: false }));
-        expect(picker.value.getHours()).toBe(3); // 15 - 12 = 3 (AM)
+        expect(picker.value.getHours()).toBe(2); // 14 - 12 = 2 (AM)
     });
 });

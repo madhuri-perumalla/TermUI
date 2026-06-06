@@ -10,7 +10,7 @@ export interface TimePickerOptions {
 export class TimePicker extends Widget {
     private _date: Date;
     private _use24Hour: boolean;
-    private _activeSegment: 0 | 1 | 2 = 0; // 0: Hours, 1: Minutes, 2: AM/PM
+    private _activeSegment: number = 0; // 0: Hours, 1: Minutes, 2: AM/PM
     private _onChange?: (date: Date) => void;
     focusable = true;
 
@@ -46,13 +46,14 @@ export class TimePicker extends Widget {
         }
         this._date = d;
         this.markDirty();
+        this._onChange?.(this._date);
     }
 
     private _nextSegment(delta: number): void {
         this._activeSegment += delta;
         const max = this._use24Hour ? 1 : 2;
         if (this._activeSegment < 0) this._activeSegment = 0;
-        if (this._activeSegment > max) this._activeSegment = max as any;
+        if (this._activeSegment > max) this._activeSegment = max;
         this.markDirty();
     }
 
