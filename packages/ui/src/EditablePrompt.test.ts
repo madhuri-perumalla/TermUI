@@ -3,6 +3,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { Screen, type KeyEvent, caps } from '@termuijs/core';
 import { EditablePrompt } from './EditablePrompt.js';
 
+// Helper to fix repeated KeyEvent type assertions (CodeRabbit requirement)
+const makeKeyEvent = (key: string): KeyEvent => 
+  ({ key } as Partial<KeyEvent> as KeyEvent);
+
 const MIXED_CHOICES = [
     { type: 'checkbox' as const, name: 'verbose', message: 'Verbose output' },
     { type: 'text' as const, name: 'output', message: 'Output path', initial: './dist' },
@@ -42,7 +46,7 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
 
             expect(prompt.result.selected).toContain('verbose');
         });
@@ -53,15 +57,15 @@ describe('EditablePrompt', () => {
             });
 
             // Select first checkbox
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
             expect(prompt.result.selected).toEqual(['verbose']);
 
             // Navigate down to skip text field
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('down'));
 
             // Select third checkbox (minify)
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
             expect(prompt.result.selected).toEqual(['verbose', 'minify']);
         });
 
@@ -70,10 +74,10 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
             expect(prompt.result.selected).toContain('verbose');
 
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
             expect(prompt.result.selected).toEqual([]);
         });
 
@@ -82,7 +86,7 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
 
             const screen = new Screen(50, 10);
             prompt.updateRect({ x: 0, y: 0, width: 50, height: 10 });
@@ -100,10 +104,10 @@ describe('EditablePrompt', () => {
             });
 
             // Navigate to text field (index 1)
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
 
             // Enter edit mode
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('enter'));
 
             const screen = new Screen(50, 10);
             prompt.updateRect({ x: 0, y: 0, width: 50, height: 10 });
@@ -118,26 +122,26 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter'));
 
             // Clear existing and add new value
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
 
-            prompt.handleKey({ key: 'b' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'u' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'i' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'l' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'd' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('b'));
+            prompt.handleKey(makeKeyEvent('u'));
+            prompt.handleKey(makeKeyEvent('i'));
+            prompt.handleKey(makeKeyEvent('l'));
+            prompt.handleKey(makeKeyEvent('d'));
 
             // Submit edit
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('enter'));
 
             expect(prompt.result.values.output).toBe('build');
         });
@@ -149,16 +153,16 @@ describe('EditablePrompt', () => {
 
             const initialValue = prompt.result.values.output;
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter'));
 
             // Type something
-            prompt.handleKey({ key: 'x' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'y' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'z' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('x'));
+            prompt.handleKey(makeKeyEvent('y'));
+            prompt.handleKey(makeKeyEvent('z'));
 
             // Cancel
-            prompt.handleKey({ key: 'escape' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('escape'));
 
             // Value should remain unchanged
             expect(prompt.result.values.output).toBe(initialValue);
@@ -169,24 +173,24 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter'));
 
             // Clear initial value
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
 
-            prompt.handleKey({ key: 't' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'e' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 's' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('t'));
+            prompt.handleKey(makeKeyEvent('e'));
+            prompt.handleKey(makeKeyEvent('s'));
+            prompt.handleKey(makeKeyEvent('backspace'));
 
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('enter'));
 
             expect(prompt.result.values.output).toBe('te');
         });
@@ -223,7 +227,7 @@ describe('EditablePrompt', () => {
             expect(row0).toContain(focusMarker);
 
             // Navigate down
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
             prompt.render(screen);
             row0 = screen.back[0].map((c: any) => c.char).join('').trim(); // Cell type required for screen back buffer rendering
             const row1 = screen.back[1].map((c: any) => c.char).join('').trim(); // Cell type required for screen back buffer rendering
@@ -236,11 +240,11 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('down'));
 
             // Navigate up
-            prompt.handleKey({ key: 'up' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('up'));
 
             const focusMarker = caps.unicode ? '❯' : '>';
 
@@ -257,8 +261,8 @@ describe('EditablePrompt', () => {
                 choices: MIXED_CHOICES,
             });
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent); // Enter edit mode
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter')); // Enter edit mode
 
             const focusMarker = caps.unicode ? '❯' : '>';
             const screen = new Screen(50, 10);
@@ -270,8 +274,8 @@ describe('EditablePrompt', () => {
             expect(row1).toContain('_'); // Verify editing cursor is visible
 
             // Try to navigate
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'up' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('up'));
 
             // Verify focus and editing state unchanged
             prompt.render(screen);
@@ -288,28 +292,28 @@ describe('EditablePrompt', () => {
             });
 
             // Check first checkbox
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
 
             // Navigate to text field and edit it
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'backspace' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'b' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'u' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'i' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'l' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'd' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('backspace'));
+            prompt.handleKey(makeKeyEvent('b'));
+            prompt.handleKey(makeKeyEvent('u'));
+            prompt.handleKey(makeKeyEvent('i'));
+            prompt.handleKey(makeKeyEvent('l'));
+            prompt.handleKey(makeKeyEvent('d'));
+            prompt.handleKey(makeKeyEvent('enter'));
 
             // Navigate to third checkbox and check it
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('space'));
 
             const result = prompt.result;
             expect(result.selected).toEqual(['verbose', 'minify']);
@@ -325,7 +329,7 @@ describe('EditablePrompt', () => {
                 onChange,
             });
 
-            prompt.handleKey({ key: 'space' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('space'));
 
             expect(onChange).toHaveBeenCalledWith({
                 selected: ['verbose'],
@@ -340,10 +344,10 @@ describe('EditablePrompt', () => {
                 onChange,
             });
 
-            prompt.handleKey({ key: 'down' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'x' } as Partial<KeyEvent> as KeyEvent);
-            prompt.handleKey({ key: 'enter' } as Partial<KeyEvent> as KeyEvent);
+            prompt.handleKey(makeKeyEvent('down'));
+            prompt.handleKey(makeKeyEvent('enter'));
+            prompt.handleKey(makeKeyEvent('x'));
+            prompt.handleKey(makeKeyEvent('enter'));
 
             expect(onChange).toHaveBeenCalledWith(
                 expect.objectContaining({

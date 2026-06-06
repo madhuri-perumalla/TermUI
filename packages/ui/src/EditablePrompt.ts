@@ -232,7 +232,7 @@ export class EditablePrompt extends Widget {
             screen.writeString(x, y + line, text.slice(0, width), {
                 ...attrs,
                 bold: isFocused || isEditing,
-                fg: choice.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : attrs.fg,
+                fg: choice.disabled ? { type: 'named', name: 'brightBlack' } : attrs.fg,
                 dim: choice.disabled,
             });
 
