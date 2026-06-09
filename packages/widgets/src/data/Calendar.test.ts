@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────
 
 import { describe, it, expect, vi } from 'vitest';
-import { Screen, caps } from '@termuijs/core';
+import { Screen, caps, type KeyEvent } from '@termuijs/core';
 import { Calendar } from './Calendar.js';
 
 describe('Calendar', () => {
@@ -64,11 +64,11 @@ describe('Calendar', () => {
         const cal = new Calendar({ width: 30, height: 10 }, { date: new Date(2026, 5, 2) });
 
         // Move left: -1 day -> June 1, 2026
-        cal.handleKey({ key: 'left' } as any);
+        cal.handleKey({ key: 'left' } as KeyEvent);
         expect(cal.getSelectedDate().getDate()).toBe(1);
 
         // Move right: +1 day -> June 2, 2026
-        cal.handleKey({ key: 'right' } as any);
+        cal.handleKey({ key: 'right' } as KeyEvent);
         expect(cal.getSelectedDate().getDate()).toBe(2);
     });
 
@@ -76,11 +76,11 @@ describe('Calendar', () => {
         const cal = new Calendar({ width: 30, height: 10 }, { date: new Date(2026, 5, 10) });
 
         // Move up: -7 days -> June 3, 2026
-        cal.handleKey({ key: 'up' } as any);
+        cal.handleKey({ key: 'up' } as KeyEvent);
         expect(cal.getSelectedDate().getDate()).toBe(3);
 
         // Move down: +7 days -> June 10, 2026
-        cal.handleKey({ key: 'down' } as any);
+        cal.handleKey({ key: 'down' } as KeyEvent);
         expect(cal.getSelectedDate().getDate()).toBe(10);
     });
 
@@ -88,14 +88,14 @@ describe('Calendar', () => {
         const cal = new Calendar({ width: 30, height: 10 }, { date: new Date(2026, 5, 1) }); // June 1, 2026
 
         // Move left: -1 day -> May 31, 2026
-        cal.handleKey({ key: 'left' } as any);
+        cal.handleKey({ key: 'left' } as KeyEvent);
         const date = cal.getSelectedDate();
         expect(date.getFullYear()).toBe(2026);
         expect(date.getMonth()).toBe(4); // May is 4
         expect(date.getDate()).toBe(31);
 
         // Move right: +1 day -> June 1, 2026
-        cal.handleKey({ key: 'right' } as any);
+        cal.handleKey({ key: 'right' } as KeyEvent);
         expect(cal.getSelectedDate().getMonth()).toBe(5); // June is 5
         expect(cal.getSelectedDate().getDate()).toBe(1);
     });
@@ -105,11 +105,11 @@ describe('Calendar', () => {
         const cal = new Calendar({ width: 30, height: 10 }, { date: new Date(2024, 1, 28) });
 
         // Move right: +1 day -> Feb 29, 2024
-        cal.handleKey({ key: 'right' } as any);
+        cal.handleKey({ key: 'right' } as KeyEvent);
         expect(cal.getSelectedDate().getDate()).toBe(29);
 
         // Move right: +1 day -> Mar 1, 2024
-        cal.handleKey({ key: 'right' } as any);
+        cal.handleKey({ key: 'right' } as KeyEvent);
         expect(cal.getSelectedDate().getMonth()).toBe(2); // March is 2
         expect(cal.getSelectedDate().getDate()).toBe(1);
     });
@@ -119,7 +119,7 @@ describe('Calendar', () => {
         const date = new Date(2026, 5, 2);
         const cal = new Calendar({ width: 30, height: 10 }, { date, onSelect });
 
-        cal.handleKey({ key: 'enter' } as any);
+        cal.handleKey({ key: 'enter' } as KeyEvent);
         expect(onSelect).toHaveBeenCalled();
         expect(onSelect.mock.calls[0][0].getDate()).toBe(2);
     });
@@ -193,7 +193,7 @@ describe('Calendar', () => {
         cal.clearDirty();
         expect(cal.isDirty).toBe(false);
 
-        cal.handleKey({ key: 'left' } as any);
+        cal.handleKey({ key: 'left' } as KeyEvent);
         expect(cal.isDirty).toBe(true);
 
         cal.clearDirty();
