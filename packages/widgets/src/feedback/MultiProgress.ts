@@ -100,8 +100,9 @@ export class MultiProgress extends Widget {
      * @internal
      */
     getHeightForTest(): number {
-        // Height is always set in constructor, but handle undefined for type safety
-        return this._style.height ?? 0;
+        // Height is always set as number in constructor (options.items.length)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return this._style.height as number;
     }
 
     /**
