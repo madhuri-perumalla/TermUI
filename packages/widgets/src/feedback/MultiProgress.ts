@@ -100,7 +100,8 @@ export class MultiProgress extends Widget {
      * @internal
      */
     getHeightForTest(): number {
-        return this._style.height;
+        // Height is always set in constructor, but handle undefined for type safety
+        return this._style.height ?? 0;
     }
 
     /**
@@ -108,6 +109,8 @@ export class MultiProgress extends Widget {
      * @internal
      */
     setDirtyForTest(value: boolean): void {
+        // Access private _dirty from Widget base class for testing
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (this as any)._dirty = value;
     }
 
