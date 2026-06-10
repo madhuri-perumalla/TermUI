@@ -71,6 +71,46 @@ export class MultiProgress extends Widget {
         }
     }
 
+    /**
+     * Test-only getter for items array
+     * @internal
+     */
+    getItemsForTest(): ProgressItem[] {
+        return this._items;
+    }
+
+    /**
+     * Test-only getter for labelWidth
+     * @internal
+     */
+    getLabelWidthForTest(): number {
+        return this._labelWidth;
+    }
+
+    /**
+     * Test-only getter for showValues
+     * @internal
+     */
+    getShowValuesForTest(): boolean {
+        return this._showValues;
+    }
+
+    /**
+     * Test-only getter for style height
+     * @internal
+     */
+    getHeightForTest(): number {
+        return this._style.height;
+    }
+
+    /**
+     * Test-only setter for dirty state
+     * @internal
+     */
+    setDirtyForTest(value: boolean): void {
+        (this as any)._dirty = value;
+    }
+
     protected _renderSelf(screen: Screen): void {
         const rect = this._getContentRect();
         const { x, y, width } = rect;
