@@ -90,6 +90,8 @@ export class ScrollView extends Widget {
         const rect = this._getContentRect();
         for (const child of this._children) {
             const origRect = { ...child.rect };
+            // Access protected _rect to temporarily modify for scroll offset rendering
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (child as any)._rect = {
                 x: origRect.x,
                 y: origRect.y - this._scrollOffset,
@@ -99,6 +101,8 @@ export class ScrollView extends Widget {
             try {
                 child.render(screen);
             } finally {
+                // Restore original rect after rendering
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (child as any)._rect = origRect;
             }
         }

@@ -46,7 +46,7 @@ export class Masonry extends Widget {
       const col = colHeights.indexOf(Math.min(...colHeights));
       const x = col * colWidth;
       const y = colHeights[col];
-      const height = (child as any).preferredHeight ?? (child.rect.height || 1);
+      const height = child.rect.height || 1;
 
       child.updateRect({ x, y, width: colWidth, height });
 
