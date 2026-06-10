@@ -110,9 +110,8 @@ export class MultiProgress extends Widget {
      * @internal
      */
     setDirtyForTest(value: boolean): void {
-        // Access private _dirty from Widget base class for testing
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this as any)._dirty = value;
+        // _dirty is protected in Widget base class; accessible directly from subclass
+        this._dirty = value;
     }
 
     protected _renderSelf(screen: Screen): void {
