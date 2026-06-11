@@ -29,12 +29,7 @@ import * as os from 'node:os';
 
 let _batchDepth = 0;
 // Map store instance to { listeners, prevState, nextState }
-interface BatchEntry<T> {
-    prevState: T;
-    nextState: T;
-    commit: () => void;
-    rollback: (s: T) => void;
-}
+const _batchStores = new Map<Set<Listener<any>>, { prevState: any; nextState: any }>();
 
 const _batchStores = new Map<Set<any>, BatchEntry<any>>();
 /**
@@ -149,8 +144,10 @@ export interface StoreOptions<T> {
     persist?: PersistOptions;
 }
 
-export const logger: Middleware<any> = (prevState, update, next) => {
-    return next(update);
+export const logger: Middleware<unknown> = (prevState, update, next) => {
+    // console.log is forbidden in TermUI source files.
+    // To debug state changes, write to a file instead.
+    const nextState = next(update);
 };
 
 export interface Computed<U> {
@@ -228,7 +225,7 @@ export function createStore<T extends object>(
 ): UseStore<T>;
 
 export function createStore<T extends object>(
-    creator: any,
+    creator: StateCreator<T> | T,
     options?: StoreOptions<T>
 ): UseStore<T> {
     const listeners = new Set<Listener<T>>();
@@ -264,7 +261,7 @@ export function createStore<T extends object>(
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir, { recursive: true });
                 }
-                const dataToSave: any = {};
+                const dataToSave: Record<string, unknown> = {};
                 for (const [key, val] of Object.entries(state)) {
                     if (typeof val !== 'function') {
                         dataToSave[key] = val;
@@ -288,7 +285,7 @@ export function createStore<T extends object>(
 
             // Only notify if at least one key's value actually changed
             const hasChanged = Object.keys(finalPartial).some(
-                key => !Object.is((state as any)[key], (nextState as any)[key])
+                key => !Object.is(state[key as keyof T], nextState[key as keyof T])
             );
             if (hasChanged) {
                 if (_batchDepth > 0) {
@@ -362,7 +359,7 @@ export function createStore<T extends object>(
     // Initialize state (supports creator functions or plain objects)
     state = typeof creator === 'function'
         ? (creator as StateCreator<T>)(setState, getState)
-        : { ...(creator as any) } as T;
+        : { ...creator } as T;
     
     // Capture initial state BEFORE persist rehydration
     const initialState = structuredClone(
@@ -449,16 +446,16 @@ export function createStore<T extends object>(
     }
 
     // Attach store methods to the hook for direct access
-    (useStore as any).getState = getState;
-    (useStore as any).setState = setState;
-    (useStore as any).subscribe = subscribe;
-    (useStore as any).destroy = destroy;
-    (useStore as any).computed = computed;
-    // dispose is exposed on each Computed<U> instance returned by computed() — no hook-level attach needed
-    (useStore as any).reset = reset;
-    (useStore as any).getInitialState = getInitialState;
+    const storeHook = useStore as UseStore<T>;
+    storeHook.getState = getState;
+    storeHook.setState = setState;
+    storeHook.subscribe = subscribe;
+    storeHook.destroy = destroy;
+    storeHook.computed = computed;
+    storeHook.reset = reset;
+    storeHook.getInitialState = getInitialState;
 
-    return useStore as UseStore<T>;
+    return storeHook;
 }
 
 // ── Hook Type ──
