@@ -319,11 +319,17 @@ describe('HeatMap', () => {
             widget.updateRect({ x: 0, y: 0, width: 20, height: 5 });
             widget.render(screen);
 
-            // Find a cell with high color and verify it's red
-            const highCell = screen.back[0]!.find(cell => cell.fg.type === 'named');
-            if (highCell?.fg.type === 'named') {
-                expect(highCell.fg.name).toBe('red');
+            // Check cells for named colors and verify at least one is red
+            let foundRed = false;
+            for (const cell of screen.back[0]!) {
+                if (cell.fg.type === 'named') {
+                    if (cell.fg.name === 'red') {
+                        foundRed = true;
+                        break;
+                    }
+                }
             }
+            expect(foundRed).toBe(true);
         });
 
         it('applies lowColor to cells with norm < 0.75', async () => {
@@ -341,11 +347,17 @@ describe('HeatMap', () => {
             widget.updateRect({ x: 0, y: 0, width: 20, height: 5 });
             widget.render(screen);
 
-            // Find a cell with low color and verify it's cyan
-            const lowCell = screen.back[0]!.find(cell => cell.fg.type === 'named');
-            if (lowCell?.fg.type === 'named') {
-                expect(lowCell.fg.name).toBe('cyan');
+            // Check cells for named colors and verify at least one is cyan
+            let foundCyan = false;
+            for (const cell of screen.back[0]!) {
+                if (cell.fg.type === 'named') {
+                    if (cell.fg.name === 'cyan') {
+                        foundCyan = true;
+                        break;
+                    }
+                }
             }
+            expect(foundCyan).toBe(true);
         });
     });
 });
