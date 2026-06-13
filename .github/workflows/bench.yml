@@ -56,9 +56,18 @@ jobs:
       - name: Check if this is benchmark system upgrade
         id: check-upgrade
         run: |
-          if [ -f packages/core/src/benchmark/run-all.ts ] && ! git -C ../main-worktree diff --quiet HEAD packages/core/src/benchmark/run-all.ts 2>/dev/null || [ ! -f ../main-worktree/packages/core/src/benchmark/run-all.ts ]; then
+          # Check if run-all.ts exists in PR but not in main, or if they differ
+          if [ -f packages/core/src/benchmark/run-all.ts ] && [ ! -f ../main-worktree/packages/core/src/benchmark/run-all.ts ]; then
             echo "is_upgrade=true" >> $GITHUB_OUTPUT
-            echo "This PR adds or upgrades the benchmark system - skipping regression checks"
+            echo "This PR adds the benchmark system - skipping regression checks"
+          elif [ -f packages/core/src/benchmark/run-all.ts ] && [ -f ../main-worktree/packages/core/src/benchmark/run-all.ts ]; then
+            # Compare the files directly
+            if ! diff -q packages/core/src/benchmark/run-all.ts ../main-worktree/packages/core/src/benchmark/run-all.ts > /dev/null 2>&1; then
+              echo "is_upgrade=true" >> $GITHUB_OUTPUT
+              echo "This PR upgrades the benchmark system - skipping regression checks"
+            else
+              echo "is_upgrade=false" >> $GITHUB_OUTPUT
+            fi
           else
             echo "is_upgrade=false" >> $GITHUB_OUTPUT
           fi
