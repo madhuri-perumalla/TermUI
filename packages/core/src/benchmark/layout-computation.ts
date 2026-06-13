@@ -43,9 +43,11 @@ function createLayoutTree(nodeCount: number, depth: number, branching: number): 
         const children: LayoutNode[] = [];
         
         if (currentDepth < depth && nodesCreated < nodeCount) {
-            const childCount = Math.min(branching, nodeCount - nodesCreated);
+            const remaining = nodeCount - nodesCreated;
+            const childCount = Math.min(branching, remaining);
             for (let i = 0; i < childCount; i++) {
                 children.push(createNode(currentDepth + 1));
+                nodesCreated++;
             }
         }
         
@@ -54,7 +56,7 @@ function createLayoutTree(nodeCount: number, depth: number, branching: number): 
             flexDirection: currentDepth % 2 === 0 ? 'row' : 'column',
             padding: currentDepth % 3 === 0 ? 1 : 0,
             margin: currentDepth % 4 === 0 ? 1 : 0,
-            border: currentDepth % 5 === 0 ? 'single' as const : undefined,
+            border: currentDepth % 5 === 0 ? 'single' : undefined,
             width: currentDepth % 2 === 0 ? '100%' : undefined,
             height: currentDepth % 3 === 0 ? '50%' : undefined,
             gap: currentDepth % 4 === 0 ? 1 : 0,

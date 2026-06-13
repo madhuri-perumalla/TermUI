@@ -63,7 +63,7 @@ function createComplexStyle(propertyCount: number): Style {
                 style[prop] = i % 3 === 0 ? 1 : 0;
                 break;
             case 'border':
-                style[prop] = 'single' as const;
+                style[prop] = 'single';
                 break;
             case 'width':
             case 'height':

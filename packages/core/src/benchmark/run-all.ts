@@ -18,7 +18,7 @@ interface BenchmarkResult {
     runMs: number;
     node: string;
     bun: string | null;
-    results: any[];
+    results: unknown[];
 }
 
 interface AggregatedResults {
@@ -45,6 +45,7 @@ async function runBenchmark(benchmarkFile: string): Promise<BenchmarkResult> {
 
         let stdout = '';
         let stderr = '';
+        let resolved = false;
 
         proc.stdout.on('data', (data) => {
             stdout += data.toString();
@@ -54,7 +55,17 @@ async function runBenchmark(benchmarkFile: string): Promise<BenchmarkResult> {
             stderr += data.toString();
         });
 
+        proc.on('error', (err) => {
+            if (!resolved) {
+                resolved = true;
+                reject(new Error(`Failed to spawn benchmark ${benchmarkFile}: ${err.message}`));
+            }
+        });
+
         proc.on('close', (code) => {
+            if (resolved) return;
+            resolved = true;
+            
             if (code !== 0) {
                 reject(new Error(`Benchmark ${benchmarkFile} failed with code ${code}: ${stderr}`));
                 return;
@@ -67,7 +78,17 @@ async function runBenchmark(benchmarkFile: string): Promise<BenchmarkResult> {
                     try {
                         const jsonStr = line.replace('BENCH_RESULT_JSON: ', '');
                         const result = JSON.parse(jsonStr);
-                        resolve(result);
+                        // Validate the result structure
+                        if (!result || typeof result !== 'object') {
+                            throw new Error('Invalid result: not an object');
+                        }
+                        if (!result.benchmark || typeof result.benchmark !== 'string') {
+                            throw new Error('Invalid result: missing or invalid benchmark field');
+                        }
+                        if (!Array.isArray(result.results)) {
+                            throw new Error('Invalid result: results is not an array');
+                        }
+                        resolve(result as BenchmarkResult);
                         return;
                     } catch (e) {
                         reject(new Error(`Failed to parse benchmark result from ${benchmarkFile}: ${e}`));

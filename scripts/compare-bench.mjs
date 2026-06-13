@@ -101,6 +101,7 @@ for (const bench of mainBenchmarks) {
 // Create a map of benchmark name -> benchmark data for easy lookup
 const mainByBench = new Map(mainBenchmarks.map((b) => [b.benchmark, b]));
 const headBenchNames = new Set(headBenchmarks.map((b) => b.benchmark));
+const mainBenchNames = new Set(mainBenchmarks.map((b) => b.benchmark));
 
 let regressed = false;
 const markdownSections = [];
@@ -128,6 +129,13 @@ for (const headBench of headBenchmarks) {
     // Generate comparison table based on benchmark type
     const headResults = headBench.results;
     const mainResults = mainBench.results;
+    
+    // Guard against empty results arrays
+    if (headResults.length === 0 || mainResults.length === 0) {
+        markdownSections.push(`⚠️ Benchmark has no results - skipping comparison.`);
+        markdownSections.push('');
+        continue;
+    }
     
     // Determine the key function based on result structure
     let keyFn, valueFn, unit;
