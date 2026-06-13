@@ -52,9 +52,31 @@ try {
 }
 
 // Handle both old format (single benchmark) and new format (aggregated benchmarks)
-const isAggregated = head.benchmarks !== undefined;
-const headBenchmarks = isAggregated ? head.benchmarks : [head];
-const mainBenchmarks = isAggregated ? main.benchmarks : [main];
+const isAggregatedHead = head.benchmarks !== undefined;
+const isAggregatedMain = main.benchmarks !== undefined;
+const headBenchmarks = isAggregatedHead ? head.benchmarks : [head];
+const mainBenchmarks = isAggregatedMain ? main.benchmarks : [main];
+
+// Detect format migration - if formats differ, this is a benchmark system upgrade
+const isFormatMigration = isAggregatedHead !== isAggregatedMain;
+
+if (isFormatMigration) {
+    console.log('Benchmark format migration detected - skipping regression checks for this PR.');
+    const markdown = [
+        '<!-- termui-bench-comment -->',
+        '## Performance benchmarks',
+        '',
+        'ℹ️ **Benchmark system upgrade** - This PR upgrades the benchmark infrastructure from single-benchmark to multi-benchmark format.',
+        '',
+        'Regression checks are skipped for this migration PR. Future PRs will compare against the new baseline.',
+        '',
+        `Bun ${head.bun ?? 'n/a'} · Node ${head.node}`,
+    ].join('\n');
+    const outPath = process.env.BENCH_COMMENT_OUT ?? 'bench-comment.md';
+    writeFileSync(outPath, markdown + '\n', 'utf8');
+    console.log(markdown);
+    process.exit(0);
+}
 
 function validateBenchmark(data, name) {
     if (!data || typeof data !== 'object') {
@@ -98,7 +120,7 @@ for (const headBench of headBenchmarks) {
     markdownSections.push('');
     
     if (!mainBench) {
-        markdownSections.push(`⚠️ Benchmark not present in main branch - new benchmark.`);
+        markdownSections.push(`⚠️ Benchmark not present in main branch - new benchmark (no regression check).`);
         markdownSections.push('');
         continue;
     }
@@ -198,8 +220,8 @@ for (const benchName of mainBenchNames) {
 }
 
 // Add footer
-const nodeVersion = isAggregated ? head.node : head.node;
-const bunVersion = isAggregated ? head.bun : head.bun;
+const nodeVersion = isAggregatedHead ? head.node : head.node;
+const bunVersion = isAggregatedHead ? head.bun : head.bun;
 markdownSections.push(`---`);
 markdownSections.push(`Bun ${bunVersion ?? 'n/a'} · Node ${nodeVersion}`);
 
