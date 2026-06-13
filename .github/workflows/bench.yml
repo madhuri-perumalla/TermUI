@@ -42,8 +42,11 @@ jobs:
       - name: Bench main
         working-directory: ../main-worktree
         run: |
-          if [ -f packages/core/src/benchmark/render-loop.ts ]; then
+          if [ -f packages/core/src/benchmark/run-all.ts ]; then
             bun run bench | tee ../bench-main.txt
+            grep '^BENCH_RESULT_JSON: ' ../bench-main.txt | sed 's/^BENCH_RESULT_JSON: //' > $GITHUB_WORKSPACE/bench-main.json
+          elif [ -f packages/core/src/benchmark/render-loop.ts ]; then
+            bun packages/core/src/benchmark/render-loop.ts | tee ../bench-main.txt
             grep '^BENCH_RESULT_JSON: ' ../bench-main.txt | sed 's/^BENCH_RESULT_JSON: //' > $GITHUB_WORKSPACE/bench-main.json
           else
             echo "No benchmark on main yet — using HEAD as baseline (no regression possible)."
@@ -66,5 +69,5 @@ jobs:
       - name: Fail on regression
         if: steps.compare.outcome == 'failure'
         run: |
-          echo "::error::Render-loop benchmark regressed by ≥20% on at least one size."
+          echo "::error::Performance benchmark regressed by ≥20% on at least one metric."
           exit 1
