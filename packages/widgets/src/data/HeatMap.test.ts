@@ -259,6 +259,37 @@ describe('HeatMap', () => {
             const widget = new HeatMap([[0, 100]], {});
             const screen = new Screen(20, 5);
             widget.updateRect({ x: 0, y: 0, width: 20, height: 5 });
+<<<<<<< Updated upstream
+
+            // First render
+            widget.render(screen);
+            const firstRender = screen.back.map(row => row.map(cell => cell.char).join(''));
+
+            // Second render with same data (no matrix change)
+            widget.render(screen);
+            const secondRender = screen.back.map(row => row.map(cell => cell.char).join(''));
+
+            // Output should be identical when data hasn't changed
+            expect(firstRender).toEqual(secondRender);
+=======
+            widget.render(screen);
+            expect(widget.isDirty).toBe(false);
+
+            widget.setMatrix([[50, 50]]);
+            expect(widget.isDirty).toBe(true);
+>>>>>>> Stashed changes
+        });
+
+        it('rendering twice with same data produces identical output', async () => {
+            vi.stubEnv('NO_UNICODE', '');
+            vi.stubEnv('TERM', '');
+            vi.resetModules();
+
+            const { Screen } = await import('@termuijs/core');
+            const { HeatMap } = await import('./HeatMap.js');
+            const widget = new HeatMap([[0, 100]], {});
+            const screen = new Screen(20, 5);
+            widget.updateRect({ x: 0, y: 0, width: 20, height: 5 });
 
             // First render
             widget.render(screen);
