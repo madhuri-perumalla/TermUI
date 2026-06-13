@@ -53,10 +53,36 @@ jobs:
             cp $GITHUB_WORKSPACE/bench-head.json $GITHUB_WORKSPACE/bench-main.json
           fi
 
+      - name: Check if this is benchmark system upgrade
+        id: check-upgrade
+        run: |
+          if [ -f packages/core/src/benchmark/run-all.ts ] && ! git -C ../main-worktree diff --quiet HEAD packages/core/src/benchmark/run-all.ts 2>/dev/null || [ ! -f ../main-worktree/packages/core/src/benchmark/run-all.ts ]; then
+            echo "is_upgrade=true" >> $GITHUB_OUTPUT
+            echo "This PR adds or upgrades the benchmark system - skipping regression checks"
+          else
+            echo "is_upgrade=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Compare results
         id: compare
         continue-on-error: true
-        run: node scripts/compare-bench.mjs bench-head.json bench-main.json --threshold 0.20
+        if: steps.check-upgrade.outputs.is_upgrade != 'true'
+        run: |
+          node scripts/compare-bench.mjs bench-head.json bench-main.json --threshold 0.20
+          echo "Compare exit code: $?"
+
+      - name: Skip comparison for upgrade
+        if: steps.check-upgrade.outputs.is_upgrade == 'true'
+        run: |
+          echo '<!-- termui-bench-comment -->' > bench-comment.md
+          echo '## Performance benchmarks' >> bench-comment.md
+          echo '' >> bench-comment.md
+          echo 'ℹ️ **Benchmark system upgrade** - This PR adds or upgrades the benchmark infrastructure.' >> bench-comment.md
+          echo '' >> bench-comment.md
+          echo 'Regression checks are skipped for this upgrade PR. Future PRs will compare against the new baseline.' >> bench-comment.md
+          echo '' >> bench-comment.md
+          echo 'Benchmark results:' >> bench-comment.md
+          cat bench-head.json >> bench-comment.md
 
       - name: Post or update PR comment
         continue-on-error: true

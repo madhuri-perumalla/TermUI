@@ -51,6 +51,10 @@ try {
     process.exit(2);
 }
 
+// Log the parsed structures for debugging
+console.log('HEAD structure:', JSON.stringify(head, null, 2).substring(0, 500));
+console.log('Main structure:', JSON.stringify(main, null, 2).substring(0, 500));
+
 // Handle both old format (single benchmark) and new format (aggregated benchmarks)
 const isAggregatedHead = head.benchmarks !== undefined;
 const isAggregatedMain = main.benchmarks !== undefined;
@@ -62,6 +66,8 @@ const isFormatMigration = isAggregatedHead !== isAggregatedMain;
 
 if (isFormatMigration) {
     console.log('Benchmark format migration detected - skipping regression checks for this PR.');
+    console.log(`HEAD format: ${isAggregatedHead ? 'aggregated' : 'single'}`);
+    console.log(`Main format: ${isAggregatedMain ? 'aggregated' : 'single'}`);
     const markdown = [
         '<!-- termui-bench-comment -->',
         '## Performance benchmarks',
