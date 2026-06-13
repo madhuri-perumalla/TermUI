@@ -27,9 +27,17 @@ import * as os from 'node:os';
 
 // ── Batch Mechanism ──
 
+interface BatchEntry<T> {
+    prevState: T;
+    nextState: T;
+    commit: () => void;
+    rollback: () => void;
+}
+
 let _batchDepth = 0;
-// Map store instance to { listeners, prevState, nextState }
-const _batchStores = new Map<Set<Listener<any>>, { prevState: any; nextState: any }>();
+// Map store instance to batch entry. Using any for listener set type because
+// the batch mechanism operates on the raw Set<Listener<T>> without knowing T at this level.
+const _batchStores = new Map<Set<any>, BatchEntry<any>>();
 
 const _batchStores = new Map<Set<any>, BatchEntry<any>>();
 /**
@@ -144,7 +152,8 @@ export interface StoreOptions<T> {
     persist?: PersistOptions;
 }
 
-export const logger: Middleware<unknown> = (prevState, update, next) => {
+// Using any for logger middleware because it's a debug utility that needs to work with any state type
+export const logger: Middleware<any> = (prevState, update, next) => {
     // console.log is forbidden in TermUI source files.
     // To debug state changes, write to a file instead.
     const nextState = next(update);
@@ -225,7 +234,8 @@ export function createStore<T extends object>(
 ): UseStore<T>;
 
 export function createStore<T extends object>(
-    creator: StateCreator<T> | T,
+    // Using any to accept both StateCreator<T> function and plain T object (overloaded below)
+    creator: any,
     options?: StoreOptions<T>
 ): UseStore<T> {
     const listeners = new Set<Listener<T>>();
@@ -261,7 +271,8 @@ export function createStore<T extends object>(
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir, { recursive: true });
                 }
-                const dataToSave: Record<string, unknown> = {};
+                // Using any because we filter out functions and only persist serializable data
+                const dataToSave: any = {};
                 for (const [key, val] of Object.entries(state)) {
                     if (typeof val !== 'function') {
                         dataToSave[key] = val;
@@ -284,8 +295,9 @@ export function createStore<T extends object>(
             const nextState = { ...state, ...finalPartial };
 
             // Only notify if at least one key's value actually changed
+            // Type assertion needed because Object.keys returns string[] but state access requires keyof T
             const hasChanged = Object.keys(finalPartial).some(
-                key => !Object.is(state[key as keyof T], nextState[key as keyof T])
+                key => !Object.is((state as any)[key], (nextState as any)[key])
             );
             if (hasChanged) {
                 if (_batchDepth > 0) {
@@ -359,7 +371,8 @@ export function createStore<T extends object>(
     // Initialize state (supports creator functions or plain objects)
     state = typeof creator === 'function'
         ? (creator as StateCreator<T>)(setState, getState)
-        : { ...creator } as T;
+        // Type assertion needed because spread loses precise type information
+        : { ...(creator as any) } as T;
     
     // Capture initial state BEFORE persist rehydration
     const initialState = structuredClone(
@@ -446,16 +459,16 @@ export function createStore<T extends object>(
     }
 
     // Attach store methods to the hook for direct access
-    const storeHook = useStore as UseStore<T>;
-    storeHook.getState = getState;
-    storeHook.setState = setState;
-    storeHook.subscribe = subscribe;
-    storeHook.destroy = destroy;
-    storeHook.computed = computed;
-    storeHook.reset = reset;
-    storeHook.getInitialState = getInitialState;
+    // Type assertion needed to attach methods to the hook function beyond its call signature
+    (useStore as any).getState = getState;
+    (useStore as any).setState = setState;
+    (useStore as any).subscribe = subscribe;
+    (useStore as any).destroy = destroy;
+    (useStore as any).computed = computed;
+    (useStore as any).reset = reset;
+    (useStore as any).getInitialState = getInitialState;
 
-    return storeHook;
+    return useStore as UseStore<T>;
 }
 
 // ── Hook Type ──
