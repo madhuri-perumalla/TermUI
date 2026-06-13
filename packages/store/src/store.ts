@@ -292,12 +292,14 @@ export function createStore<T extends object>(
             : partial;
 
         const applyUpdate = (finalPartial: Partial<T>): T => {
-            const nextState = { ...state, ...finalPartial };
+            // When in a batch, compute nextState from pending batch state if available
+            const baseState = _batchDepth > 0 ? _batchStores.get(listeners)?.nextState ?? state : state;
+            const nextState = { ...baseState, ...finalPartial };
 
             // Only notify if at least one key's value actually changed
             // Type assertion needed because Object.keys returns string[] but state access requires keyof T
             const hasChanged = Object.keys(finalPartial).some(
-                key => !Object.is((state as any)[key], (nextState as any)[key])
+                key => !Object.is((baseState as any)[key], (nextState as any)[key])
             );
             if (hasChanged) {
                 if (_batchDepth > 0) {
