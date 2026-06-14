@@ -65,3 +65,8 @@ export type { TemperatureData, UseTemperatureResult } from './hooks/useTemperatu
 
 export { useFileWatch } from './hooks/useFileWatch.js'
 export type { FileWatchData, UseFileWatchResult, UseFileWatchOptions } from './hooks/useFileWatch.js'
+
+export { services } from './services.js';
+export type { ServiceInfo } from './services.js';
+export { useServiceHealth } from './hooks/useServiceHealth.js';
+export type { UseServiceHealthResult } from './hooks/useServiceHealth.js';
