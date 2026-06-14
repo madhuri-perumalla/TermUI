@@ -285,7 +285,7 @@ export function render(
 ): TestInstance {
     const width = options.width ?? 80;
     const height = options.height ?? 24;
-    const screen = new Screen(width, height);
+    const screenRef = { current: new Screen(width, height) };
 
     let currentElement = element;
 
@@ -319,24 +319,24 @@ export function render(
             container.addChild(newRoot);
             rootWidget = newRoot;
         }
-        renderToScreen(container, screen);
+        renderToScreen(container, screenRef.current);
     });
 
     // Initial render
-    renderToScreen(container, screen);
+    renderToScreen(container, screenRef.current);
 
     const instance: TestInstance = {
         container,
-        screen,
+        screen: screenRef.current,
 
         toString(): string {
-            return readScreenLines(screen)
+            return readScreenLines(screenRef.current)
                 .filter((l) => l.length > 0)
                 .join("\n");
         },
 
         lastFrame(): string[] {
-            return readScreenLines(screen);
+            return readScreenLines(screenRef.current);
         },
 
         getByText(text: string): Widget | null {
@@ -350,7 +350,7 @@ export function render(
             if (matches.length > 0) return matches[0];
 
             // Fallback: check screen buffer
-            const screenText = readScreenLines(screen).join("\n");
+            const screenText = readScreenLines(screenRef.current).join("\n");
             if (screenText.includes(text)) {
                 return container;
             }
@@ -433,7 +433,7 @@ export function render(
                 container.clearChildren();
                 container.addChild(newRoot);
                 rootWidget = newRoot;
-                renderToScreen(container, screen);
+                renderToScreen(container, screenRef.current);
             }
         },
 
@@ -483,7 +483,7 @@ export function render(
                 container.addChild(newRoot);
                 rootWidget = newRoot;
             }
-            renderToScreen(container, screen);
+            renderToScreen(container, screenRef.current);
         },
 
         click(x: number, y: number) {
@@ -506,7 +506,7 @@ export function render(
                 container.clearChildren();
                 container.addChild(newRoot);
                 rootWidget = newRoot;
-                renderToScreen(container, screen);
+                renderToScreen(container, screenRef.current);
             } else {
                 // No new element: re-render existing fiber, preserving state.
                 const instances: Map<Widget, any> = (globalThis as any)
@@ -517,7 +517,7 @@ export function render(
                     container.clearChildren();
                     container.addChild(newRoot);
                     rootWidget = newRoot;
-                    renderToScreen(container, screen);
+                    renderToScreen(container, screenRef.current);
                 } else {
                     console.warn(
                         "[testing] rerender() called but no fiber instance or element available",
@@ -560,9 +560,9 @@ export function render(
         },
 
         fireResize(cols: number, rows: number): void {
-            const newScreen = new Screen(cols, rows);
-            Object.assign(instance, { screen: newScreen });
-            renderToScreen(container, newScreen);
+            screenRef.current = new Screen(cols, rows);
+            instance.screen = screenRef.current;
+            renderToScreen(container, screenRef.current);
         },
 
         unmount(): void {
