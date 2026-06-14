@@ -81,6 +81,12 @@ export type { UseModalResult } from './hooks/useModal.js';
 // ── Subprocess ──
 export { useSubprocess } from './hooks/useSubprocess.js';
 export type { UseSubprocessResult } from './hooks/useSubprocess.js';
+export { useWorker } from './hooks/useWorker.js';
+
+export type {
+    UseWorkerOptions,
+    UseWorkerResult,
+} from './hooks/useWorker.js';
 
 // ── Render ──
 export { render, renderApp } from './render.js';
