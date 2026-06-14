@@ -466,7 +466,6 @@ function renderComponent(
             }
             // No boundary found — destroy fiber and show default error widget
             destroyFiber(fiber);
-            console.error('[TermUI] Unhandled component error:', error);
             return reconcile(defaultErrorVNode(error));
         }
 
@@ -581,7 +580,6 @@ export function reRenderComponent(instance: ComponentInstance): Widget {
         destroyFiber(fiber);
         _pruneInstancesForWidget(instance.widget);
         invalidateLayout(instance.widget.getLayoutNode());
-        console.error('[TermUI] Unhandled component error:', err);
         return reconcile(defaultErrorVNode(err));
     }
 

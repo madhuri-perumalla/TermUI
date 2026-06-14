@@ -343,10 +343,7 @@ export function useKeymap(bindings: KeyBinding[]): void {
             for (const b of bindings) {
                 const key = `${b.key}|${b.ctrl ?? false}|${b.alt ?? false}|${b.shift ?? false}`;
                 if (seen.has(key)) {
-                    console.warn(
-                        `[useKeymap] Conflicting keybinding for key "${b.key}" ` +
-                        `(ctrl=${b.ctrl ?? false}, alt=${b.alt ?? false}, shift=${b.shift ?? false})`
-                    );
+                    // Conflicting keybinding — silently ignore in dev mode
                 }
                 seen.set(key, b);
             }
