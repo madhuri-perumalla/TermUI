@@ -441,9 +441,13 @@ export function createStore<T extends object>(
         selectorRef.current = select;
 
         useEffect(() => {
+            let prevSelected = selectorRef.current(store.getState());
             const unsubscribe = store.subscribe((newState) => {
                 const newSelected = selectorRef.current(newState);
-                setSelectedState(newSelected);
+                if (!Object.is(prevSelected, newSelected)) {
+                    prevSelected = newSelected;
+                    setSelectedState(newSelected);
+                }
             });
             return unsubscribe;
         }, []);
