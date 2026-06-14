@@ -2,7 +2,7 @@
 // @termuijs/widgets — Spinner widget
 // ─────────────────────────────────────────────────────
 
-import { type Screen, type Style, styleToCellAttrs, type Color, caps, BRAILLE_SPIN, prefersReducedMotion } from '@termuijs/core';
+import { type Screen, type Style, styleToCellAttrs, type Color, caps, BRAILLE_SPIN, prefersReducedMotion, stringWidth } from '@termuijs/core';
 import { timerPoolSubscribe } from '@termuijs/motion';
 import { Widget } from '../base/Widget.js';
 
@@ -223,7 +223,7 @@ export class Spinner extends Widget {
 
         // Render label
         if (this._label) {
-            const labelX = char ? x + char.length + 1 : x;
+            const labelX = char ? x + stringWidth(char) + 1 : x;
             screen.writeString(labelX, y, this._label, attrs);
         }
     }
