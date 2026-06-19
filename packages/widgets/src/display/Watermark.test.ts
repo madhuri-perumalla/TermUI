@@ -58,45 +58,83 @@ describe('Watermark', () => {
 
     it('does not mark dirty when setText receives the same value', () => {
         const watermark = new Watermark('CONFIDENTIAL');
-    
+
         watermark.clearDirty();
-    
+
         watermark.setText('CONFIDENTIAL');
-    
+
         expect(watermark.isDirty).toBe(false);
     });
-    
+
     it('marks dirty when setText receives a different value', () => {
         const watermark = new Watermark('CONFIDENTIAL');
-    
+
         watermark.clearDirty();
-    
+
         watermark.setText('INTERNAL');
-    
+
         expect(watermark.isDirty).toBe(true);
     });
 
     it('renders double-width unicode characters', () => {
         const { screen } = renderWatermark('你好', {}, {}, 4, 1);
-    
+
         expect(rowText(screen, 0)).toContain('你');
         expect(rowText(screen, 0)).toContain('好');
     });
-    
+
     it('renders emoji watermark content', () => {
         const { screen } = renderWatermark('😀', {}, {}, 4, 1);
-    
+
         expect(rowText(screen, 0)).toContain('😀');
     });
 
     it('marks continuation cells for wide Unicode characters', () => {
         const { screen } = renderWatermark('你', {}, {}, 4, 1);
-    
+
         expect(screen.back[0][0].char).toBe('你');
         expect(screen.back[0][0].width).toBe(2);
-    
+
         expect(screen.back[0][1].char).toBe('');
         expect(screen.back[0][1].width).toBe(0);
     });
-    
+
+    it('renders nothing for empty text', () => {
+        const { screen } = renderWatermark('', {}, {}, 4, 1);
+
+        expect(rowText(screen, 0)).toBe('    ');
+    });
+
+    it('renders flag emoji as a single double-width grapheme', () => {
+        const { screen } = renderWatermark('🇺🇸', {}, {}, 4, 1);
+
+        expect(screen.back[0][0].char).toBe('🇺🇸');
+        expect(screen.back[0][0].width).toBe(2);
+        expect(screen.back[0][1].char).toBe('');
+        expect(screen.back[0][1].width).toBe(0);
+    });
+
+    it('renders ZWJ family emoji as one grapheme cluster', () => {
+        const family = '👨‍👩‍👧‍👦';
+        const { screen } = renderWatermark(family, {}, {}, 6, 1);
+
+        expect(rowText(screen, 0)).toContain(family);
+        expect(screen.back[0][0].width).toBe(2);
+    });
+
+    it('handles combining marks as a single grapheme', () => {
+        const composed = 'e\u0301'; // e + combining acute (should form é)
+        const { screen } = renderWatermark(composed, {}, {}, 4, 1);
+
+        expect(rowText(screen, 0)).toContain('é');
+    });
+
+    it('renders double-width char in a single-column screen without throwing', () => {
+        const { screen } = renderWatermark('你', {}, {}, 1, 1);
+
+        // getLine filters continuation cells; single-column should still contain the character
+        expect(rowText(screen, 0)).toBe('你');
+        expect(screen.back[0][0].width).toBe(2);
+    });
+
 });
