@@ -123,21 +123,41 @@ export class TextInput extends Widget {
     }
 
     moveCursorLeft(): void {
-        this._cursorPos = Math.max(0, this._cursorPos - 1);
+        const next = Math.max(0, this._cursorPos - 1);
+
+        if (next === this._cursorPos) {
+            return;
+        }
+
+        this._cursorPos = next;
         this.markDirty();
     }
 
     moveCursorRight(): void {
-        this._cursorPos = Math.min(this._value.length, this._cursorPos + 1);
+        const next = Math.min(this._value.length, this._cursorPos + 1);
+
+        if (next === this._cursorPos) {
+            return;
+        }
+
+        this._cursorPos = next;
         this.markDirty();
     }
 
     moveCursorHome(): void {
+        if (this._cursorPos === 0) {
+            return;
+        }
+
         this._cursorPos = 0;
         this.markDirty();
     }
 
     moveCursorEnd(): void {
+        if (this._cursorPos === this._value.length) {
+            return;
+        }
+
         this._cursorPos = this._value.length;
         this.markDirty();
     }
@@ -155,8 +175,8 @@ export class TextInput extends Widget {
 
     protected _renderSelf(screen: Screen): void {
         const rect = this._getContentRect();
-        const { x, y, width } = rect;
-        if (width <= 0) return;
+        const { x, y, width, height } = rect;
+        if (width <= 0 || height <= 0) return;
 
         const attrs = styleToCellAttrs(this._style);
 
@@ -218,12 +238,17 @@ export class TextInput extends Widget {
                 ? `${length}/${max}`
                 : `${length}`;
 
-            screen.writeString(
-                x,
-                y + 1,
-                counterText,
-                { ...attrs, dim: true }
-            );
+            const counterWidth = stringWidth(counterText);
+            const counterX = x + width - counterWidth;
+
+            if (counterX >= x) {
+                screen.writeString(
+                    counterX,
+                    y,
+                    counterText,
+                    { ...attrs, dim: true }
+                );
+            }
         }
     }
 }
