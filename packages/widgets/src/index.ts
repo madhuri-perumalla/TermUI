@@ -122,6 +122,8 @@ export { Divider } from './layout/Divider.js';
 export type { DividerOptions, DividerOrientation } from './layout/Divider.js';
 export { AspectRatio } from './layout/AspectRatio.js';
 export type { AspectRatioOptions } from './layout/AspectRatio.js';
+export { DraggableWidget, DroppableWidget, DragState } from './layout/DragAndDrop.js';
+export type { DraggableOptions, DroppableOptions } from './layout/DragAndDrop.js';
 export { Fill } from './layout/Fill.js';
 export type { FillOptions } from './layout/Fill.js';
 export { SplitPane } from './layout/SplitPane.js';
