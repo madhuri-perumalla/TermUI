@@ -243,3 +243,6 @@ export type { TokenUsageOptions } from './TokenUsage.js';
 export { WelcomeScreen } from './WelcomeScreen.js';
 export type { WelcomeScreenOptions, KeymapHint } from './WelcomeScreen.js';
 
+export { SetupFlow } from './SetupFlow.js';
+export type { SetupFlowOptions, SetupStep } from './SetupFlow.js';
+
