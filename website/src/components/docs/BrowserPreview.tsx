@@ -101,6 +101,7 @@ export function BrowserPreview({
             convertEol: true,
             disableStdin: false,
             cursorBlink: true,
+            scrollback: 0,
             theme: {
                 background: '#0a0a12',
                 foreground: '#e8e8f0',
