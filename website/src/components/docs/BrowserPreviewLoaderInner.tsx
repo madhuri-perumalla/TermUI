@@ -11,8 +11,6 @@ const BrowserPreview = dynamic(
 
 interface Props {
     slug: string
-    cols?: number
-    rows?: number
     mouse?: boolean
     className?: string
 }

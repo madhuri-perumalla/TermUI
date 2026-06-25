@@ -267,7 +267,7 @@ export default async function ComponentDetailPage({
                         </div>
                         {demoSlugs.has(comp.slug)
                             ? <div className="cd-mac-body">
-                                  <BrowserPreviewLoader slug={comp.slug} cols={58} rows={16} mouse />
+                                  <BrowserPreviewLoader slug={comp.slug} mouse />
                               </div>
                             : <pre className="cd-mac-body">
                                   <code>{ascii}</code>

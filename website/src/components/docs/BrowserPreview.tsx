@@ -82,16 +82,12 @@ function makeStdin(term: XTerm): NodeJS.ReadStream {
 // ── BrowserPreview React component ────────────────────────────────────
 export interface BrowserPreviewProps {
     factory: () => RootWidget
-    cols?: number
-    rows?: number
     mouse?: boolean
     className?: string
 }
 
 export function BrowserPreview({
     factory,
-    cols = 60,
-    rows = 18,
     mouse = false,
     className,
 }: BrowserPreviewProps) {

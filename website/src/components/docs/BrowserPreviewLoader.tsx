@@ -9,8 +9,6 @@ const BrowserPreviewLoaderInner = dynamic(
 
 interface BrowserPreviewLoaderProps {
     slug: string
-    cols?: number
-    rows?: number
     mouse?: boolean
     className?: string
 }
