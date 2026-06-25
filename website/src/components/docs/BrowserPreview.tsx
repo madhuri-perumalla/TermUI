@@ -45,10 +45,6 @@ function makeStdout(term: XTerm): NodeJS.WriteStream {
         cork() {},
         uncork() {},
         setDefaultEncoding() { return this },
-        on(ev: string, fn: (d: unknown) => void) { ee.on(ev, fn); return this },
-        off(ev: string, fn: (d: unknown) => void) { ee.off(ev, fn); return this },
-        once(ev: string, fn: (d: unknown) => void) { ee.once(ev, fn); return this },
-        emit(ev: string, d?: unknown) { return ee.emit(ev, d) },
     }) as unknown as NodeJS.WriteStream
 }
 
@@ -66,10 +62,6 @@ function makeStdin(term: XTerm): NodeJS.ReadStream {
         ref() {},
         unref() {},
         read() { return null },
-        on(ev: string, fn: (d: unknown) => void) { ee.on(ev, fn); return shim as unknown as NodeJS.ReadStream },
-        off(ev: string, fn: (d: unknown) => void) { ee.off(ev, fn); return shim as unknown as NodeJS.ReadStream },
-        once(ev: string, fn: (d: unknown) => void) { ee.once(ev, fn); return shim as unknown as NodeJS.ReadStream },
-        emit(ev: string, d?: unknown) { return ee.emit(ev, d) },
     }) as unknown as NodeJS.ReadStream
 
     // Wire xterm input → stdin 'data' event (InputParser listens here)
