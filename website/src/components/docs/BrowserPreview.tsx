@@ -117,6 +117,10 @@ export function BrowserPreview({
         fitAddon.fit() // fills container dimensions → sets actual cols/rows
         term.focus()   // capture keyboard immediately without requiring a click
 
+        // Refit whenever the container resizes so cols/rows stay in sync
+        const ro = new ResizeObserver(() => fitAddon.fit())
+        ro.observe(el)
+
         const stdout = makeStdout(term)
         const stdin = makeStdin(term)
 
@@ -171,6 +175,7 @@ export function BrowserPreview({
 
         return () => {
             cancelAnimationFrame(rafId)
+            ro.disconnect()
             app.unmount()
             term.dispose()
         }

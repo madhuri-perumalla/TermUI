@@ -8,10 +8,16 @@ const config: NextConfig = {
   reactStrictMode: true,
   turbopack: {
     resolveAlias: {
-      child_process: { browser: './src/lib/empty-child-process.ts' },
+      child_process:    { browser: './src/lib/empty-child-process.ts' },
       'node:child_process': path.resolve(__dirname, 'src/lib/empty-child-process.ts'),
-      net:           { browser: './src/lib/empty.js' },
-      tls:           { browser: './src/lib/empty.js' },
+      net:              { browser: './src/lib/empty.js' },
+      tls:              { browser: './src/lib/empty.js' },
+      'node:fs':        path.resolve(__dirname, 'src/lib/empty.js'),
+      'node:path':      path.resolve(__dirname, 'src/lib/empty.js'),
+      'node:os':        path.resolve(__dirname, 'src/lib/empty.js'),
+      'node:net':       path.resolve(__dirname, 'src/lib/empty.js'),
+      'node:tls':       path.resolve(__dirname, 'src/lib/empty.js'),
+      'node:crypto':    path.resolve(__dirname, 'src/lib/empty.js'),
     },
   },
   webpack(cfg, { isServer }) {
@@ -36,6 +42,12 @@ const config: NextConfig = {
         'node:string_decoder': 'string_decoder',
         'node:events': 'events/',
         'node:child_process': path.resolve(__dirname, 'src/lib/empty-child-process.ts'),
+        'node:fs':     path.resolve(__dirname, 'src/lib/empty.js'),
+        'node:path':   path.resolve(__dirname, 'src/lib/empty.js'),
+        'node:os':     path.resolve(__dirname, 'src/lib/empty.js'),
+        'node:net':    path.resolve(__dirname, 'src/lib/empty.js'),
+        'node:tls':    path.resolve(__dirname, 'src/lib/empty.js'),
+        'node:crypto': path.resolve(__dirname, 'src/lib/empty.js'),
       }
     }
     return cfg
