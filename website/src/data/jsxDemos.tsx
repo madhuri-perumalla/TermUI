@@ -39,6 +39,12 @@ import {
     AUDIBLE_FEEDBACK_TYPES,
     type FeedbackType,
 } from '@termuijs/jsx'
+import {
+    useNotifications,
+    useForm,
+    FormBuilder,
+    FormContext,
+} from '@termuijs/ui'
 
 // ── use-counter ──────────────────────────────────────
 function UseCounterDemo() {
@@ -560,6 +566,114 @@ function AudibleFeedbackTypesDemo() {
     )
 }
 
+// ── use-notifications ────────────────────────────────
+function UseNotificationsDemo() {
+    const { notifications, push, dismiss, dismissAll } = useNotifications()
+    useInput((key) => {
+        if (key === 'a') push('New event at ' + new Date().toLocaleTimeString(), 'info')
+        else if (key === 's') push('Saved successfully', 'success')
+        else if (key === 'd') { const last = notifications[notifications.length - 1]; if (last) dismiss(last.id) }
+        else if (key === 'c') dismissAll()
+    })
+    const latest = notifications[notifications.length - 1]
+    return (
+        <box flexDirection="column" padding={1} gap={1}>
+            <text bold color="cyan">useNotifications</text>
+            <text>count: <text bold color="green">{String(notifications.length)}</text></text>
+            <text>latest: <text color="yellow">{latest ? `[${latest.type}] ${latest.message}` : '—'}</text></text>
+            <box flexDirection="column">
+                {notifications.slice(-4).map((n) => <text color="yellow">• [{n.type}] {n.message}</text>)}
+            </box>
+            <text dim>a add info · s add success · d dismiss last · c clear all</text>
+        </box>
+    )
+}
+
+// ── use-form ─────────────────────────────────────────
+// useForm() reads FormContext — it exposes submit(). Wrap in a FormBuilder provider.
+function UseFormConsumer() {
+    const form = useForm()
+    const [submits, setSubmits] = useState(0)
+    useInput((key) => {
+        if (key === '\r' || key === '\n' || key === 's') { form.submit(); setSubmits((n) => n + 1) }
+    })
+    return (
+        <box flexDirection="column" padding={1} gap={1}>
+            <text bold color="cyan">useForm</text>
+            <text>submit fn: <text bold color="green">{typeof form.submit === 'function' ? 'ready' : 'missing'}</text></text>
+            <text>submits fired: <text bold color="yellow">{String(submits)}</text></text>
+            <text dim>useForm() = useContext(FormContext) · press s / Enter to call form.submit()</text>
+        </box>
+    )
+}
+function UseFormDemo() {
+    const [count, setCount] = useState(0)
+    return (
+        <FormBuilder onSubmit={() => setCount((n) => n + 1)}>
+            <box flexDirection="column">
+                <UseFormConsumer />
+                <text dim>  (provider onSubmit count: {String(count)})</text>
+            </box>
+        </FormBuilder>
+    )
+}
+
+// ── form-context ─────────────────────────────────────
+// Raw FormContext.Provider + consumer sharing the same submit() handler.
+function FormContextConsumer({ label }: { label: string }) {
+    const { submit } = useForm()
+    return <text>{label}: <text color="green">submit {typeof submit === 'function' ? 'available' : 'unavailable'}</text></text>
+}
+function FormContextDemo() {
+    const [fired, setFired] = useState('none')
+    useInput((key) => {
+        if (key === '1') setFired('child A')
+        else if (key === '2') setFired('child B')
+    })
+    return (
+        <FormContext.Provider value={{ submit: () => setFired('shared submit()') }}>
+            <box flexDirection="column" padding={1} gap={1}>
+                <text bold color="cyan">FormContext</text>
+                <FormContextConsumer label="child A" />
+                <FormContextConsumer label="child B" />
+                <text>last: <text bold color="yellow">{fired}</text></text>
+                <text dim>both children read the same Provider value via useForm()/useContext</text>
+            </box>
+        </FormContext.Provider>
+    )
+}
+
+// ── form-builder ─────────────────────────────────────
+// FormBuilder is a JSX FC that provides FormContext to its children.
+function FormBuilderInner() {
+    const { submit } = useForm()
+    const [submitted, setSubmitted] = useState(false)
+    useInput((key) => {
+        if (key === '\r' || key === '\n' || key === 's') { submit(); setSubmitted(true) }
+        else if (key === 'r') setSubmitted(false)
+    })
+    return (
+        <box flexDirection="column">
+            <text>name:  <text color="green">Karanjot</text></text>
+            <text>email: <text color="green">dev@termuijs.dev</text></text>
+            <text>submitted: <text bold color={submitted ? 'green' : 'red'}>{String(submitted)}</text></text>
+        </box>
+    )
+}
+function FormBuilderDemo() {
+    const [count, setCount] = useState(0)
+    return (
+        <box flexDirection="column" padding={1} gap={1}>
+            <text bold color="cyan">FormBuilder</text>
+            <FormBuilder onSubmit={() => setCount((n) => n + 1)}>
+                <FormBuilderInner />
+            </FormBuilder>
+            <text>onSubmit calls: <text bold color="yellow">{String(count)}</text></text>
+            <text dim>provides FormContext to children · s / Enter submit · r reset</text>
+        </box>
+    )
+}
+
 const jsxDemos: Record<string, () => VNode> = {
     'use-counter': () => <UseCounterDemo />,
     'use-modal': () => <UseModalDemo />,
@@ -591,6 +705,10 @@ const jsxDemos: Record<string, () => VNode> = {
     'use-package-manager': () => <UsePackageManagerDemo />,
     'trigger-feedback': () => <TriggerFeedbackDemo />,
     'a-u-d-i-b-l-e_-f-e-e-d-b-a-c-k_-t-y-p-e-s': () => <AudibleFeedbackTypesDemo />,
+    'use-notifications': () => <UseNotificationsDemo />,
+    'use-form': () => <UseFormDemo />,
+    'form-context': () => <FormContextDemo />,
+    'form-builder': () => <FormBuilderDemo />,
 }
 
 export default jsxDemos

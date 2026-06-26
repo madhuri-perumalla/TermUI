@@ -226,8 +226,8 @@ export type { DraggableProps, DroppableProps } from './components/DragAndDrop.js
 export { Popover } from './Popover.js';
 export type { PopoverOptions, PopoverPlacement } from './Popover.js';
 
-export { FormBuilder, useForm } from './components/FormBuilder.js';
-export type { FormBuilderProps } from './components/FormBuilder.js';
+export { FormBuilder, useForm, FormContext } from './components/FormBuilder.js';
+export type { FormBuilderProps, FormContextValue } from './components/FormBuilder.js';
 
 export { SearchInput } from './SearchInput.js';
 export type { SearchInputOptions } from './SearchInput.js';

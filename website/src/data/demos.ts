@@ -184,7 +184,27 @@ import {
     GridItem,
     DraggableWidget,
     DroppableWidget,
+    BarColumn,
+    TextColumn,
+    TimeColumn,
+    SpeedColumn,
+    PercentageColumn,
+    jsonToTree,
+    SPINNER_FRAMES,
+    computeRange,
+    computeVariableRange,
+    DragState,
+    ScrollAcceleration,
+    useListState,
+    useTableState,
 } from '@termuijs/widgets'
+import {
+    NotificationStore,
+    notifications as notificationsStore,
+    NonInteractiveError,
+    Draggable,
+    Droppable,
+} from '@termuijs/ui'
 
 const demos: Record<string, () => RootWidget> = {
     // ── Display ───────────────────────────────────────
@@ -1635,6 +1655,302 @@ const demos: Record<string, () => RootWidget> = {
         col.addChild(new Spacer(1))
         col.addChild(new Text('Below spacer', { fg: { type: 'named', name: 'yellow' } }))
         return col
+    },
+
+    // ── remaining widgets + ui ───────────────────────
+
+    // Progress columns — factory fns returning column defs, fed to a Progress widget.
+    'bar-column': () => {
+        const col = new Stack([])
+        col.addChild(new Text('BarColumn() → { kind: "bar" }  · renders a 10-cell [████░░] bar from task.value', { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Spacer(1))
+        col.addChild(new Progress({
+            tasks: [
+                { label: 'Download', value: 0.85 },
+                { label: 'Extract',  value: 0.50 },
+                { label: 'Install',  value: 0.20 },
+            ],
+            columns: [TextColumn({ template: '{task.label}' }), BarColumn()],
+        }, { height: 3 }))
+        return col
+    },
+
+    'text-column': () => {
+        const col = new Stack([])
+        col.addChild(new Text('TextColumn({ template: "{task.label}" }) → { kind: "text" }  · pulls a field by template', { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Spacer(1))
+        col.addChild(new Progress({
+            tasks: [
+                { label: 'frontend', value: 0.9, stage: 'building' },
+                { label: 'backend',  value: 0.6, stage: 'testing' },
+                { label: 'infra',    value: 0.3, stage: 'queued' },
+            ],
+            columns: [
+                TextColumn({ template: '{task.label}' }),
+                TextColumn({ template: '{task.stage}' }),
+                BarColumn(),
+            ],
+        }, { height: 3 }))
+        return col
+    },
+
+    'time-column': () => {
+        const col = new Stack([])
+        const def = TimeColumn()
+        col.addChild(new Text(`TimeColumn() → ${JSON.stringify(def)}  · an elapsed/remaining time column def`, { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Spacer(1))
+        // Pair with a custom render column so the time value is visible in-row.
+        col.addChild(new Progress({
+            tasks: [
+                { label: 'Sync',   value: 0.7, eta: '00:42' },
+                { label: 'Verify', value: 0.4, eta: '01:18' },
+            ],
+            columns: [
+                TextColumn({ template: '{task.label}' }),
+                BarColumn(),
+                { ...TimeColumn(), render: (t) => `ETA ${String(t.eta ?? '--:--')}` },
+            ],
+        }, { height: 2 }))
+        return col
+    },
+
+    'speed-column': () => {
+        const col = new Stack([])
+        const def = SpeedColumn()
+        col.addChild(new Text(`SpeedColumn() → ${JSON.stringify(def)}  · a throughput/rate column def`, { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Spacer(1))
+        col.addChild(new Progress({
+            tasks: [
+                { label: 'eth0', value: 0.8, rate: '12.4 MB/s' },
+                { label: 'eth1', value: 0.5, rate: '6.1 MB/s' },
+            ],
+            columns: [
+                TextColumn({ template: '{task.label}' }),
+                BarColumn(),
+                { ...SpeedColumn(), render: (t) => String(t.rate ?? '0 B/s') },
+            ],
+        }, { height: 2 }))
+        return col
+    },
+
+    'percentage-column': () => {
+        const col = new Stack([])
+        col.addChild(new Text('PercentageColumn() → { kind: "percentage" }  · renders Math.round(task.value * 100) + "%"', { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Spacer(1))
+        col.addChild(new Progress({
+            tasks: [
+                { label: 'Coverage',   value: 0.94 },
+                { label: 'Type-check', value: 1.0 },
+                { label: 'Lint',       value: 0.67 },
+            ],
+            columns: [TextColumn({ template: '{task.label}' }), BarColumn(), PercentageColumn()],
+        }, { height: 3 }))
+        return col
+    },
+
+    // jsonToTree() — convert a JS object to a TreeNode, render via Tree.
+    'json-to-tree': () => {
+        const sample = {
+            name: 'TermUI',
+            version: '0.1.7',
+            stable: true,
+            packages: ['core', 'widgets', 'ui'],
+            config: { renderer: 'xterm.js', widgets: 60 },
+        }
+        const root = jsonToTree(sample)
+        return new Tree({ nodes: [{ ...root, expanded: true }] })
+    },
+
+    // SPINNER_FRAMES const — show preset names → first few frames.
+    's-p-i-n-n-e-r_-f-r-a-m-e-s': () => {
+        const presets = ['dots', 'line', 'star', 'arc', 'circle', 'arrow', 'bar', 'pulse']
+        return new KeyValue(
+            presets.map((name) => ({
+                key: name,
+                value: SPINNER_FRAMES[name].frames.slice(0, 6).join(' '),
+            })),
+            {},
+            { keyColor: { type: 'named', name: 'cyan' } },
+        )
+    },
+
+    // computeRange() — fixed-height virtual scroll range.
+    'compute-range': () => {
+        const r = computeRange(20, 8, 1000)
+        return new KeyValue([
+            { key: 'call',     value: 'computeRange(scrollOffset=20, viewportItems=8, itemCount=1000)' },
+            { key: 'start',    value: r.start },
+            { key: 'end',      value: r.end },
+            { key: 'offsetPx', value: r.offsetPx },
+            { key: 'rendered', value: `${r.end - r.start} items (incl. overscan)` },
+        ], {}, { keyColor: { type: 'named', name: 'cyan' } })
+    },
+
+    // computeVariableRange() — variable-height virtual scroll range.
+    'compute-variable-range': () => {
+        const sizes = [10, 30, 20, 40, 15, 25, 35, 20, 30, 10]
+        const r = computeVariableRange(50, 60, sizes)
+        return new KeyValue([
+            { key: 'call',     value: 'computeVariableRange(scrollPx=50, viewportPx=60, sizes=[10,30,20,40,…])' },
+            { key: 'start',    value: r.start },
+            { key: 'end',      value: r.end },
+            { key: 'offsetPx', value: r.offsetPx },
+            { key: 'rendered', value: `${r.end - r.start} items (incl. overscan)` },
+        ], {}, { keyColor: { type: 'named', name: 'cyan' } })
+    },
+
+    // DragState singleton — render its live fields.
+    'drag-state': () => {
+        return new KeyValue([
+            { key: 'isDragging',   value: String(DragState.isDragging) },
+            { key: 'activeDragId', value: DragState.activeDragId ?? '(null)' },
+            { key: 'note',         value: 'shared singleton — Draggable/Droppable read & write these fields during a drag' },
+        ], {}, { keyColor: { type: 'named', name: 'cyan' } })
+    },
+
+    // ScrollAcceleration — feed scroll deltas, show resulting multipliers.
+    'scroll-acceleration': () => {
+        const accel = new ScrollAcceleration()
+        let now = 1000
+        const deltas = [400, 120, 60, 30, 15]
+        const rows = deltas.map((dt) => {
+            now += dt
+            const mult = accel.getMultiplier(now)
+            return { key: `Δt ${dt}ms`, value: `multiplier ×${mult}` }
+        })
+        return new KeyValue([
+            { key: 'class', value: 'ScrollAcceleration — faster scrolls amplify step size' },
+            ...rows,
+        ], {}, { keyColor: { type: 'named', name: 'cyan' } })
+    },
+
+    // useListState() — plain factory returning external List state, wired to a List.
+    'use-list-state': () => {
+        const state = useListState({
+            items: [
+                { label: 'Dashboard', value: 'dashboard' },
+                { label: 'Projects',  value: 'projects' },
+                { label: 'Settings',  value: 'settings' },
+                { label: 'Logout',    value: 'logout' },
+            ],
+        })
+        state.selectNext()
+        state.selectNext() // select index 2 → "Settings"
+        const col = new Stack([])
+        col.addChild(new Text(`useListState — selectedIndex: ${state.selectedIndex}  ("${state.items[state.selectedIndex].label}")`, { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new List({ items: state.items, state }))
+        return col
+    },
+
+    // useTableState() — external Table state wired to a Table.
+    'use-table-state': () => {
+        const state = useTableState({
+            rows: [
+                { pkg: '@termuijs/core',    version: '0.1.7', size: '42 kB' },
+                { pkg: '@termuijs/widgets', version: '0.1.7', size: '98 kB' },
+                { pkg: '@termuijs/ui',      version: '0.1.7', size: '55 kB' },
+                { pkg: '@termuijs/motion',  version: '0.1.7', size: '12 kB' },
+            ],
+        })
+        const col = new Stack([])
+        col.addChild(new Text(`useTableState — ${state.rows.length} rows, scrollOffset: ${state.scrollOffset}`, { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new Table({
+            columns: [
+                { header: 'Package', key: 'pkg',     width: 18 },
+                { header: 'Version', key: 'version', width: 9 },
+                { header: 'Size',    key: 'size',    width: 8 },
+            ],
+            state,
+            options: { showHeader: true, stripe: true },
+        }))
+        return col
+    },
+
+    // Pty — spawns a child process; CLI-only. Explain in a Banner.
+    'pty': () => new Banner({}, {
+        variant: 'info',
+        title: 'Pty — terminal multiplexer (CLI only)',
+        body: 'Pty spawns a real child process via node:child_process and streams its stdout/stderr into the screen. It requires a Node runtime with a PTY, so it cannot run in the browser preview. In a CLI:  new Pty({}, { command: "htop" })',
+    }),
+
+    // validateInput() — run a validator over sample inputs, show results.
+    'validate-input': () => {
+        const notEmpty = (v: unknown) => (String(v).trim().length === 0 ? 'Required' : null)
+        const isEmail = (v: unknown) => (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(v)) ? null : 'Invalid email')
+        // validateInput() wraps sync validators (calling them directly here mirrors its result).
+        const samples: Array<{ input: string; run: (v: unknown) => string | null | undefined }> = [
+            { input: '',                run: notEmpty },
+            { input: 'hello',           run: notEmpty },
+            { input: 'not-an-email',    run: isEmail },
+            { input: 'dev@termuijs.dev', run: isEmail },
+        ]
+        return new KeyValue(
+            samples.map((s) => {
+                const err = s.run(s.input) ?? undefined
+                return {
+                    key: s.input === '' ? '(empty)' : `"${s.input}"`,
+                    value: err ? `✗ ${err}` : '✓ valid',
+                }
+            }),
+            {},
+            { keyColor: { type: 'named', name: 'cyan' } },
+        )
+    },
+
+    // NotificationStore — create store, push, render contents in a NotificationCenter.
+    'notification-store': () => {
+        const store = NotificationStore.getInstance()
+        store.dismissAll()
+        store.push('Build completed successfully', 'success')
+        store.push('Cache is 82% full', 'warning')
+        store.push('New version 0.2.0 available', 'info')
+        return new NotificationCenter({ position: 'top-right', maxVisible: 5, width: 40 })
+    },
+
+    // notifications — the global NotificationStore singleton.
+    'notifications': () => {
+        notificationsStore.dismissAll()
+        notificationsStore.push('Deployment started', 'info')
+        notificationsStore.push('Tests passed (142/142)', 'success')
+        notificationsStore.push('Disk usage high', 'warning')
+        notificationsStore.push('Upstream API unreachable', 'error')
+        const col = new Stack([])
+        col.addChild(new Text(`notifications — global singleton, ${notificationsStore.notifications.length} active`, { fg: { type: 'named', name: 'cyan' } }))
+        col.addChild(new NotificationCenter({ position: 'top-right', maxVisible: 5, width: 40 }))
+        return col
+    },
+
+    // NonInteractiveError — Error subclass thrown by prompts in non-TTY contexts.
+    'non-interactive-error': () => new Alert({
+        variant: 'error',
+        message: `NonInteractiveError: ${new NonInteractiveError().message}`,
+    }),
+
+    // prompt — readline-based; CLI only. Explain in a Banner.
+    'prompt': () => new Banner({}, {
+        variant: 'info',
+        title: 'prompt — interactive stdin prompts (CLI only)',
+        body: 'prompt.text / prompt.confirm / prompt.select read a line from stdin via node:readline. They require an interactive TTY and throw NonInteractiveError otherwise — so they cannot run in the browser preview.  e.g.  await prompt.text({ message: "Project name:" })',
+    }),
+
+    // Draggable() — factory returning a DraggableWidget; wrap with visible children.
+    'draggable': () => {
+        const container = new Stack([])
+        container.addChild(new Text('Draggable({ id }) → DraggableWidget', { fg: { type: 'named', name: 'cyan' } }))
+        const dw = Draggable({ id: 'card-1', onDragStart: () => {} })
+        dw.addChild(new Text('[ Drag me ] — Space to start drag · Esc to cancel', { fg: { type: 'named', name: 'green' } }))
+        container.addChild(dw)
+        return container
+    },
+
+    // Droppable() — factory returning a DroppableWidget; wrap with visible children.
+    'droppable': () => {
+        const container = new Stack([])
+        container.addChild(new Text('Droppable({ id }) → DroppableWidget', { fg: { type: 'named', name: 'cyan' } }))
+        const dz = Droppable({ id: 'zone-1', onDrop: () => {} })
+        dz.addChild(new Text('[ Drop zone ] — Enter/Space to accept the active drag', { fg: { type: 'named', name: 'yellow' } }))
+        container.addChild(dz)
+        return container
     },
 }
 
