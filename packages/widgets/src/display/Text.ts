@@ -85,12 +85,13 @@ export class Text extends Widget {
 
             // Apply horizontal scroll
             if (this._scrollX > 0) {
-                // Skip scrollX characters
+                // Skip scrollX visual columns
                 let skipped = 0;
                 let charIndex = 0;
                 for (const ch of line) {
                     if (skipped >= this._scrollX) break;
-                    skipped++;
+                    const charWidth = stringWidth(ch);
+                    skipped += charWidth;
                     charIndex += ch.length;
                 }
                 line = line.slice(charIndex);
