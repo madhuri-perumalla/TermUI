@@ -89,8 +89,17 @@ export class Text extends Widget {
                 let skipped = 0;
                 let charIndex = 0;
                 for (const ch of line) {
-                    if (skipped >= this._scrollX) break;
                     const charWidth = stringWidth(ch);
+                    if (skipped + charWidth > this._scrollX) {
+                        // scrollX lands in the middle of this character
+                        // For wide characters, we need to handle the partial column
+                        if (charWidth === 2 && skipped < this._scrollX) {
+                            // We're at the second column of a wide character
+                            // Add a placeholder for the remaining column and skip the character
+                            line = ' ' + line.slice(charIndex + ch.length);
+                        }
+                        break;
+                    }
                     skipped += charWidth;
                     charIndex += ch.length;
                 }
