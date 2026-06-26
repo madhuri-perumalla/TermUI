@@ -383,7 +383,7 @@ function resolveSize(value: number | string | undefined | Dim, available: number
     }
     if (typeof value === 'string' && value.endsWith('%')) {
         const pct = parseFloat(value) / 100;
-        if (!Number.isFinite(pct)) return 0;
+        if (!Number.isFinite(pct) || pct < 0) return 0;
         return Math.floor(available * pct);
     }
     return undefined;
