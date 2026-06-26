@@ -184,8 +184,21 @@ export function BrowserPreview({
             // ── JSX demo: reconcile VNode → widget tree, wire hooks + re-render + input ──
             // Mirrors @termuijs/jsx render(), but mounts against our shimmed App.
             isJsx = true
-            const element = jsxFactory()
-            let rootWidget: Widget = reconcile(element)
+            let element: VNode
+            let rootWidget: Widget
+            try {
+                element = jsxFactory()
+                rootWidget = reconcile(element)
+            } catch (err) {
+                term.write('\x1b[31mJSX demo failed to reconcile:\x1b[0m\r\n')
+                term.write(String((err as Error)?.stack ?? err).replace(/\n/g, '\r\n') + '\r\n')
+                console.error('[jsx demo]', err)
+                return () => { ro.disconnect(); term.dispose() }
+            }
+            // A flex child with no explicit size collapses to 0 in a column parent,
+            // so the demo's root must grow to fill the wrapper or it renders blank.
+            const fill = (w: Widget) => w.setStyle({ flexGrow: 1, width: '100%' })
+            fill(rootWidget)
             const rootBox = new Box({ flexDirection: 'column', width: '100%', height: '100%' })
             rootBox.addChild(rootWidget)
             app = new App(rootBox as unknown as RootWidget, opts)
@@ -198,6 +211,7 @@ export function BrowserPreview({
                 const newRoot: Widget = rootInstance
                     ? reRenderComponent(rootInstance)
                     : reconcile(element)
+                fill(newRoot)
                 rootBox.clearChildren()
                 rootBox.addChild(newRoot)
                 rootBox.markDirty()
@@ -226,7 +240,13 @@ export function BrowserPreview({
             registerFocusables(widget)
         }
 
-        app.mount().catch(console.error)
+        app.mount().catch((err) => {
+            console.error('[preview mount]', err)
+            try {
+                term.write('\x1b[31mmount failed:\x1b[0m\r\n')
+                term.write(String((err as Error)?.stack ?? err).replace(/\n/g, '\r\n') + '\r\n')
+            } catch { /* terminal disposed */ }
+        })
 
         // Re-fit after browser has computed final layout — onResize propagates cols/rows to App
         const rafId = requestAnimationFrame(() => fitAddon.fit())
