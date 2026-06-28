@@ -678,6 +678,28 @@ div.cd-mac-body {
     margin-bottom: var(--space-2);
 }
 
+/* ── CLI install note + copy-paste source ── */
+.cd-install-note {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.cd-install-note code {
+    font-family: var(--font-display, var(--font-mono, monospace));
+    color: var(--text-primary, #e8e8f0);
+}
+
+.cd-manual-source {
+    padding-top: var(--space-4);
+}
+
+.cd-manual-source .cd-code-block {
+    max-height: 420px;
+    overflow: auto;
+}
+
 /* ── API Reference ── */
 .cd-api-subheading {
     font-family: var(--font-display);
