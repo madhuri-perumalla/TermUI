@@ -363,7 +363,7 @@ export function createStore<T extends object>(
 
         // Piggyback on the store's own subscribe — recompute on every state change
         // but only notify computed subscribers when the derived value actually changes
-        const storeUnsub = subscribe((newState) => {
+        const unsubscribe = subscribe((newState) => {
             const newValue = selector(newState);
             if (!Object.is(cachedValue, newValue)) {
                 cachedValue = newValue;
@@ -374,7 +374,7 @@ export function createStore<T extends object>(
         });
 
         // Track the unsubscribe for cleanup when store is destroyed
-        computedUnsubscribes.add(storeUnsub);
+        computedUnsubscribes.add(unsubscribe);
 
         return {
             get: () => cachedValue,
