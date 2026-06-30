@@ -93,6 +93,31 @@ describe('createStore', () => {
         expect(spy2).not.toHaveBeenCalled()
     })
 
+    it('computed selector subscriptions are cleaned up on destroy', () => {
+        const useStore = createStore((set) => ({
+            count: 0,
+            inc: () => set((s) => ({ count: s.count + 1 })),
+        }))
+        
+        const computed = useStore.computed((s) => s.count * 2)
+        const spy = vi.fn()
+        computed.subscribe(spy)
+        
+        // Verify computed works before destroy
+        useStore.getState().inc()
+        expect(computed.get()).toBe(2)
+        expect(spy).toHaveBeenCalled()
+        
+        spy.mockClear()
+        
+        // Destroy the store
+        useStore.destroy()
+        
+        // Update state after destroy - computed should not be called
+        useStore.getState().inc()
+        expect(spy).not.toHaveBeenCalled()
+    })
+
     it('get() inside creator reads current state', () => {
         const useStore = createStore((set, get) => ({
             count: 0,

@@ -196,6 +196,7 @@ export function createStore<T extends object>(
     options?: StoreOptions<T>
 ): UseStore<T> {
     const listeners = new Set<Listener<T>>();
+    const computedUnsubscribes = new Set<() => void>();
 
     let state: T;
     let writeTimeout: NodeJS.Timeout | null = null;
@@ -309,6 +310,11 @@ export function createStore<T extends object>(
 
     const destroy = (): void => {
         listeners.clear();
+        // Clean up computed selector subscriptions
+        for (const unsubscribe of computedUnsubscribes) {
+            unsubscribe();
+        }
+        computedUnsubscribes.clear();
         if (writeTimeout) {
             clearTimeout(writeTimeout);
             writeTimeout = null;
@@ -357,7 +363,7 @@ export function createStore<T extends object>(
 
         // Piggyback on the store's own subscribe — recompute on every state change
         // but only notify computed subscribers when the derived value actually changes
-        subscribe((newState) => {
+        const unsubscribe = subscribe((newState) => {
             const newValue = selector(newState);
             if (!Object.is(cachedValue, newValue)) {
                 cachedValue = newValue;
@@ -366,6 +372,9 @@ export function createStore<T extends object>(
                 }
             }
         });
+
+        // Track the unsubscribe for cleanup when store is destroyed
+        computedUnsubscribes.add(unsubscribe);
 
         return {
             get: () => cachedValue,
