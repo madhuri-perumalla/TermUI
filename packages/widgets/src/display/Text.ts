@@ -88,6 +88,7 @@ export class Text extends Widget {
                 // Skip scrollX visual columns
                 let skipped = 0;
                 let charIndex = 0;
+                let lineRebuilt = false;
                 for (const ch of line) {
                     const charWidth = stringWidth(ch);
                     if (skipped + charWidth > this._scrollX) {
@@ -97,13 +98,16 @@ export class Text extends Widget {
                             // We're at the second column of a wide character
                             // Add a placeholder for the remaining column and skip the character
                             line = ' ' + line.slice(charIndex + ch.length);
+                            lineRebuilt = true;
                         }
                         break;
                     }
                     skipped += charWidth;
                     charIndex += ch.length;
                 }
-                line = line.slice(charIndex);
+                if (!lineRebuilt) {
+                    line = line.slice(charIndex);
+                }
             }
 
             const lineWidth = stringWidth(line);
