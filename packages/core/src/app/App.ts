@@ -166,7 +166,8 @@ export class App {
         }
 
         if (this._options.title) {
-            this.terminal.write(`\x1b]0;${this._options.title}\x07`);
+            const safeTitle = this._options.title.replace(/[\u0000-\u001F\u007F-\u009F\u001B]/g, '');
+            this.terminal.write(`\x1b]0;${safeTitle}\x07`);
         }
 
         // Handle resize
