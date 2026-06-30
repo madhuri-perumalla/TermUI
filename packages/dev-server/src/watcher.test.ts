@@ -3,9 +3,15 @@ import { FileWatcher } from './watcher.js';
 import { watch, existsSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
 
-vi.mock('node:fs', () => ({
+const { watch: mockWatch, existsSync: mockExistsSync } = vi.hoisted(() => ({
     watch: vi.fn(),
-    existsSync: vi.fn(() => true)
+    existsSync: vi.fn(() => true),
+}));
+
+
+vi.mock('node:fs', () => ({
+    watch: mockWatch,
+    existsSync: mockExistsSync,
 }));
 
 describe('FileWatcher', () => {
@@ -15,10 +21,11 @@ describe('FileWatcher', () => {
         vi.useFakeTimers();
         mockWatcherEmitter = new EventEmitter();
         vi.mocked(watch).mockReturnValue(mockWatcherEmitter as any);
+        vi.mocked(existsSync).mockReturnValue(true);
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
+        vi.clearAllMocks();
         vi.useRealTimers();
     });
 
