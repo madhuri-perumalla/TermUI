@@ -58,4 +58,69 @@ describe('Router Redirects', () => {
         expect(errorHandler).toHaveBeenCalled();
         expect(errorHandler.mock.calls[0][0].message).toMatch(/Max redirect depth exceeded/);
     });
+
+    it('detects beforeEnter infinite redirect loop and emits error', () => {
+        const router = new Router();
+        const errorHandler = vi.fn();
+        router.events.on('error', errorHandler);
+
+        router.addRoute('/a', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/b'
+        });
+        router.addRoute('/b', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/a'
+        });
+
+        router.push('/a');
+
+        expect(errorHandler).toHaveBeenCalled();
+        expect(errorHandler.mock.calls[0][0].message).toMatch(/Maximum redirect depth.*exceeded/);
+    });
+
+    it('resets redirect depth after successful navigation', () => {
+        const router = new Router();
+        const errorHandler = vi.fn();
+        router.events.on('error', errorHandler);
+
+        router.addRoute('/a', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/b'
+        });
+        router.addRoute('/b', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/c'
+        });
+        router.addRoute('/c', DummyComponent);
+
+        router.push('/a');
+        expect(router.currentPath).toBe('/c');
+        expect(errorHandler).not.toHaveBeenCalled();
+
+        // Navigate again - redirect depth should be reset
+        router.push('/a');
+        expect(router.currentPath).toBe('/c');
+        expect(errorHandler).not.toHaveBeenCalled();
+    });
+
+    it('respects custom maxRedirects option', () => {
+        const router = new Router({ maxRedirects: 3 });
+        const errorHandler = vi.fn();
+        router.events.on('error', errorHandler);
+
+        router.addRoute('/a', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/b'
+        });
+        router.addRoute('/b', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/c'
+        });
+        router.addRoute('/c', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/d'
+        });
+        router.addRoute('/d', DummyComponent, undefined, undefined, {
+            beforeEnter: () => '/a'
+        });
+
+        router.push('/a');
+
+        expect(errorHandler).toHaveBeenCalled();
+        expect(errorHandler.mock.calls[0][0].message).toMatch(/Maximum redirect depth \(3\) exceeded/);
+    });
 });
