@@ -34,6 +34,8 @@ export interface RouterOptions {
     initialPath?: string;
     /** Maximum history entries (default: 100) */
     maxHistory?: number;
+    /** Maximum redirect chain depth before throwing error (default: 10) */
+    maxRedirectDepth?: number;
 }
 
 export class Router {
@@ -42,11 +44,14 @@ export class Router {
     private _forwardStack: string[] = [];
     private _currentMatch: RouteMatch | null = null;
     private _maxHistory: number;
+    private _maxRedirectDepth: number;
+    private _redirectDepth: number = 0;
     private _pendingInitialPath: string | null = null;
     readonly events = new EventEmitter<RouterEvents>();
 
     constructor(options: RouterOptions = {}) {
         this._maxHistory = options.maxHistory ?? 100;
+        this._maxRedirectDepth = options.maxRedirectDepth ?? 10;
 
         if (options.initialPath) {
             this._pendingInitialPath = options.initialPath;
@@ -188,14 +193,22 @@ export class Router {
         const guardResult = match.route.beforeEnter?.(path);
 
         if (guardResult === false) {
+            this._redirectDepth = 0;
             return;
         }
 
         if (typeof guardResult === 'string') {
+            this._redirectDepth++;
+            if (this._redirectDepth > this._maxRedirectDepth) {
+                this._redirectDepth = 0;
+                this.events.emit('error', new Error(`Maximum redirect depth (${this._maxRedirectDepth}) exceeded. Possible infinite redirect loop.`));
+                return;
+            }
             this.push(guardResult);
             return;
         }
 
+        this._redirectDepth = 0;
         this._history.push(path);
 
         if (this._history.length > this._maxHistory) {
@@ -234,14 +247,22 @@ export class Router {
         const guardResult = match.route.beforeEnter?.(path);
 
         if (guardResult === false) {
+            this._redirectDepth = 0;
             return;
         }
 
         if (typeof guardResult === 'string') {
+            this._redirectDepth++;
+            if (this._redirectDepth > this._maxRedirectDepth) {
+                this._redirectDepth = 0;
+                this.events.emit('error', new Error(`Maximum redirect depth (${this._maxRedirectDepth}) exceeded. Possible infinite redirect loop.`));
+                return;
+            }
             this.replace(guardResult);
             return;
         }
 
+        this._redirectDepth = 0;
         if (this._history.length > 0) {
             this._history[this._history.length - 1] = path;
         } else {

@@ -241,4 +241,50 @@ describe('Router', () => {
         expect(r.current).toBeNull();
         expect(navFn).not.toHaveBeenCalled();
     });
+
+    it('beforeEnter infinite redirect loop is detected and prevented', () => {
+        const r = new Router({ maxRedirectDepth: 3 });
+        const errorFn = vi.fn();
+        r.events.on('error', errorFn);
+
+        // Create infinite redirect loop: /a -> /b -> /a -> /b -> ...
+        r.addRoute('/a', () => 'A', undefined, { beforeEnter: () => '/b' });
+        r.addRoute('/b', () => 'B', undefined, { beforeEnter: () => '/a' });
+
+        r.push('/a');
+
+        expect(errorFn).toHaveBeenCalled();
+        expect(errorFn.mock.calls[0][0].message).toContain('Maximum redirect depth');
+    });
+
+    it('replace with infinite redirect loop is detected and prevented', () => {
+        const r = new Router({ maxRedirectDepth: 3 });
+        const errorFn = vi.fn();
+        r.events.on('error', errorFn);
+
+        // Create infinite redirect loop: /a -> /b -> /a -> /b -> ...
+        r.addRoute('/a', () => 'A', undefined, { beforeEnter: () => '/b' });
+        r.addRoute('/b', () => 'B', undefined, { beforeEnter: () => '/a' });
+
+        r.replace('/a');
+
+        expect(errorFn).toHaveBeenCalled();
+        expect(errorFn.mock.calls[0][0].message).toContain('Maximum redirect depth');
+    });
+
+    it('beforeEnter redirect depth is reset on successful navigation', () => {
+        const r = new Router({ maxRedirectDepth: 3 });
+        const errorFn = vi.fn();
+        r.events.on('error', errorFn);
+
+        // Create redirect chain that doesn't loop: /a -> /b -> /c
+        r.addRoute('/a', () => 'A', undefined, { beforeEnter: () => '/b' });
+        r.addRoute('/b', () => 'B', undefined, { beforeEnter: () => '/c' });
+        r.addRoute('/c', () => 'C');
+
+        r.push('/a');
+
+        expect(errorFn).not.toHaveBeenCalled();
+        expect(r.currentPath).toBe('/c');
+    });
 });
