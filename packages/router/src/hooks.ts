@@ -22,17 +22,17 @@ export function useParams(): RouteParams {
 /**
  * Returns a function to trigger navigation.
  */
-export function useNavigate(): (path: string, options?: { replace?: boolean; query?: QueryParams }) => void {
+export function useNavigate(): (path: string, options?: { replace?: boolean }) => void {
     const router = useContext(RouterContext);
     
-    return (path: string, options?: { replace?: boolean; query?: QueryParams }) => {
+    return (path: string, options?: { replace?: boolean }) => {
         if (!router) {
             return;
         }
         if (options?.replace) {
-            router.replace(path, { query: options?.query });
+            router.replace(path);
         } else {
-            router.push(path, { query: options?.query });
+            router.push(path);
         }
     };
 }
@@ -53,5 +53,6 @@ export function useQueryParams(): QueryParams {
     if (!router) {
         return {};
     }
-    return router.query;
+    // Query params are not currently supported by the Router
+    return {};
 }
