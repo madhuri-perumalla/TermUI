@@ -21,6 +21,7 @@ function defaultErrorScreen(err: Error): VNode {
 export interface NavigateEvent {
     match: RouteMatch;
     screen: VNode;
+    direction?: 'push' | 'back' | 'replace' | 'forward';
 }
 
 export interface RouterEvents {
@@ -48,6 +49,7 @@ export class Router {
     private _redirectDepth: number = 0;
     private _pendingInitialPath: string | null = null;
     readonly events = new EventEmitter<RouterEvents>();
+    autoUnmount = true;
 
     constructor(options: RouterOptions = {}) {
         this._maxHistory = options.maxHistory ?? 100;
@@ -161,7 +163,8 @@ export class Router {
         }
     }
 
-    private _wrapScreen(match: RouteMatch): VNode {
+    /** Wrap a route match into a VNode with layout chain and providers */
+    wrapScreen(match: RouteMatch): VNode {
         let screen = createElement(match.route.component, match.params);
 
         for (let i = match.chain.length - 2; i >= 0; i--) {
@@ -218,9 +221,9 @@ export class Router {
 
         unmountAll();
 
-        const screen = this._wrapScreen(match);
+        const screen = this.wrapScreen(match);
 
-        this.events.emit('navigate', { match, screen });
+        this.events.emit('navigate', { match, screen, direction: 'push' });
 
         match.route.afterEnter?.(path);
     }
@@ -271,9 +274,9 @@ export class Router {
 
         unmountAll();
 
-        const screen = this._wrapScreen(match);
+        const screen = this.wrapScreen(match);
 
-        this.events.emit('navigate', { match, screen });
+        this.events.emit('navigate', { match, screen, direction: 'replace' });
 
         match.route.afterEnter?.(path);
     }
@@ -296,9 +299,9 @@ export class Router {
         if (match) {
             unmountAll();
 
-            const screen = this._wrapScreen(match);
+            const screen = this.wrapScreen(match);
 
-            this.events.emit('back', { match, screen });
+            this.events.emit('back', { match, screen, direction: 'back' });
         } else {
             this.events.emit('back', null);
         }
@@ -320,9 +323,9 @@ export class Router {
         this._history.push(nextPath);
         this._currentMatch = match;
         unmountAll();
-        const screen = this._wrapScreen(match);
+        const screen = this.wrapScreen(match);
         // forward() re-navigates to the most recent forward entry and emits navigate
-        this.events.emit('navigate', { match, screen });
+        this.events.emit('navigate', { match, screen, direction: 'forward' });
     }
 
     /** Move delta steps: negative is back, positive is forward */
