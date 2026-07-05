@@ -505,28 +505,33 @@ export abstract class Widget {
             const fg = this._style.focusRingColor ?? { type: 'named' as const, name: 'cyan' as const };
             const cellStyle = { fg, bold: true };
 
+            const useAscii = (this._style.asciiOnly ?? false) || !caps.unicode;
+            const corner = useAscii ? '+' : '┌';
+            const horizontal = useAscii ? '-' : '─';
+            const vertical = useAscii ? '|' : '│';
+
             // Top-left corner
-            screen.setCell(x, y, { char: '┌', ...cellStyle });
-            if (width > 2) screen.setCell(x + 1, y, { char: '─', ...cellStyle });
+            screen.setCell(x, y, { char: corner, ...cellStyle });
+            if (width > 2) screen.setCell(x + 1, y, { char: horizontal, ...cellStyle });
 
             // Top-right corner
-            screen.setCell(x + width - 1, y, { char: '┐', ...cellStyle });
-            if (width > 2) screen.setCell(x + width - 2, y, { char: '─', ...cellStyle });
+            screen.setCell(x + width - 1, y, { char: corner, ...cellStyle });
+            if (width > 2) screen.setCell(x + width - 2, y, { char: horizontal, ...cellStyle });
 
             // Bottom-left corner
-            screen.setCell(x, y + height - 1, { char: '└', ...cellStyle });
-            if (width > 2) screen.setCell(x + 1, y + height - 1, { char: '─', ...cellStyle });
+            screen.setCell(x, y + height - 1, { char: corner, ...cellStyle });
+            if (width > 2) screen.setCell(x + 1, y + height - 1, { char: horizontal, ...cellStyle });
 
             // Bottom-right corner
-            screen.setCell(x + width - 1, y + height - 1, { char: '┘', ...cellStyle });
-            if (width > 2) screen.setCell(x + width - 2, y + height - 1, { char: '─', ...cellStyle });
+            screen.setCell(x + width - 1, y + height - 1, { char: corner, ...cellStyle });
+            if (width > 2) screen.setCell(x + width - 2, y + height - 1, { char: horizontal, ...cellStyle });
 
             // Short vertical marks if tall enough
             if (height > 2) {
-                screen.setCell(x, y + 1, { char: '│', ...cellStyle });
-                screen.setCell(x + width - 1, y + 1, { char: '│', ...cellStyle });
-                screen.setCell(x, y + height - 2, { char: '│', ...cellStyle });
-                screen.setCell(x + width - 1, y + height - 2, { char: '│', ...cellStyle });
+                screen.setCell(x, y + 1, { char: vertical, ...cellStyle });
+                screen.setCell(x + width - 1, y + 1, { char: vertical, ...cellStyle });
+                screen.setCell(x, y + height - 2, { char: vertical, ...cellStyle });
+                screen.setCell(x + width - 1, y + height - 2, { char: vertical, ...cellStyle });
             }
         }
     }
